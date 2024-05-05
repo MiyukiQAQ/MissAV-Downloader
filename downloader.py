@@ -1,0 +1,128 @@
+import requests
+import re
+import threading
+import os
+from pathlib import Path
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+}
+
+video_m3u8_prefix = 'https://surrit.com/'
+video_playlist_suffix = '/playlist.m3u8'
+
+movie_url = 'https://missav.com/dm68/ssis-698'
+
+
+def get_movie_uuid(url):
+
+
+    html = requests.get(url=url, headers=headers).text
+
+    match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
+
+    if match:
+        print("match uuid success:", match.group(1))
+        return match.group(1)
+    else:
+        print("match uuid failed.")
+
+def create_folder_if_not_exists(folder_name):
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+
+
+def split_integer_into_intervals(integer, n):
+    interval_size = integer // n
+    remainder = integer % n
+
+    intervals = [(i * interval_size, (i + 1) * interval_size) for i in range(n)]
+
+    intervals[-1] = (intervals[-1][0], intervals[-1][1] + remainder)
+
+    return intervals
+
+
+def thread_task(start, end, uuid, movie_name):
+    for i in range(start, end):
+        url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
+        content = requests.get(url=url_tmp, headers=headers).content
+        file_path = movie_name + '/video' + str(i) + '.jpeg'
+        with open(file_path, 'wb') as file:
+            file.write(content)
+            print('saved: ' + file_path)
+
+
+def video_download(intervals, uuid, movie_name):
+    thread_task_list = []
+
+    for interval in intervals:
+        start = interval[0]
+        end = interval[1]
+        thread = threading.Thread(target=thread_task, args=(start, end, uuid, movie_name))
+        thread_task_list.append(thread)
+
+    for thread in thread_task_list:
+        thread.start()
+
+    for thread in thread_task_list:
+        thread.join()
+
+
+def video_save(movie_name, video_offset_max):
+    output_file_name = movie_name + '.mp4'
+    with open(output_file_name, 'wb') as outfile:
+        for i in range(video_offset_max):
+            file_path = movie_name + '/video' + str(i) + '.jpeg'
+            try:
+                with open(file_path, 'rb') as infile:
+                    outfile.write(infile.read())
+                    print('write: ' + file_path)
+            except FileNotFoundError:
+                print('not fond: ' + file_path)
+                continue
+            except Exception as e:
+                print('exception: ' + str(e))
+                continue
+
+    print('save complete: ' + output_file_name)
+
+
+if __name__ == '__main__':
+    movie_uuid = get_movie_uuid(movie_url)
+
+    playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
+
+    playlist = requests.get(url=playlist_url, headers=headers).text
+
+    # The last line records the highest resolution available for this video
+    # For example: 1280x720/video.m3u8
+    playlist_last_line = playlist.splitlines()[-1]
+
+    resolution = playlist_last_line.split('/')[0]
+
+    video_m3u8_url = video_m3u8_prefix + movie_uuid + '/' + playlist_last_line
+
+    # video.m3u8 records all jpeg video units of the video
+    video_m3u8 = requests.get(url=video_m3u8_url, headers=headers).text
+
+    # In the penultimate line of video.m3u8, find the maximum jpeg video unit number of the video
+    video_offset_max_str = video_m3u8.splitlines()[-2]
+    # For example:
+    # video1772.jpeg
+    # #EXTINF:5.000000,
+    # video1773.jpeg
+    # #EXTINF:2.500000,
+    # video1774.jpeg
+    # #EXTINF:2.250000,
+    # video1775.jpeg
+    # #EXT-X-ENDLIST
+    video_offset_max = int(re.search(r'(\d+)', video_offset_max_str).group(0))
+
+    movie_name = movie_url.split('/')[-1]
+    create_folder_if_not_exists(movie_name)
+
+    num_threads = os.cpu_count()
+    intervals = split_integer_into_intervals(video_offset_max, num_threads)
+    video_download(intervals, movie_uuid, movie_name)
+    video_save(movie_name, video_offset_max)
