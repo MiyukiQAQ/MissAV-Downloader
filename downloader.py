@@ -163,8 +163,8 @@ if __name__ == '__main__':
 
     num_threads = os.cpu_count()
     intervals = split_integer_into_intervals(video_offset_max, num_threads)
-    # video_download(intervals, movie_uuid, movie_name)
-    # video_save(movie_name, video_offset_max)
+    video_download(intervals, movie_uuid, movie_name)
+    video_save(movie_name, video_offset_max)
     delete_directory(movie_name)
     # Transfer files to linux server
     # such as a stash movie lib
