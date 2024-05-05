@@ -13,6 +13,8 @@ video_playlist_suffix = '/playlist.m3u8'
 
 movie_url = 'https://missav.com/dm68/ssis-698'
 
+movie_save_path_root = 'movies'
+
 
 def get_movie_uuid(url):
 
@@ -28,8 +30,20 @@ def get_movie_uuid(url):
         print("match uuid failed.")
 
 def create_folder_if_not_exists(folder_name):
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
+    path = movie_save_path_root + '/' + folder_name
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+import shutil
+import os
+
+def delete_directory(movie_name):
+    path = movie_save_path_root + '/' + movie_name
+    try:
+        shutil.rmtree(path)
+        print(f"path '{path}' removed")
+    except OSError as e:
+        print(f"remove '{path}' error: {e.strerror}")
 
 
 def split_integer_into_intervals(integer, n):
@@ -46,8 +60,8 @@ def split_integer_into_intervals(integer, n):
 def thread_task(start, end, uuid, movie_name):
     for i in range(start, end):
         url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
-        content = requests.get(url=url_tmp, headers=headers).content
-        file_path = movie_name + '/video' + str(i) + '.jpeg'
+        content = requests.get(url=url_tmp, headers=headers, timeout=5).content
+        file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
         with open(file_path, 'wb') as file:
             file.write(content)
             print('saved: ' + file_path)
@@ -70,10 +84,10 @@ def video_download(intervals, uuid, movie_name):
 
 
 def video_save(movie_name, video_offset_max):
-    output_file_name = movie_name + '.mp4'
+    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     with open(output_file_name, 'wb') as outfile:
         for i in range(video_offset_max):
-            file_path = movie_name + '/video' + str(i) + '.jpeg'
+            file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
             try:
                 with open(file_path, 'rb') as infile:
                     outfile.write(infile.read())
@@ -124,5 +138,6 @@ if __name__ == '__main__':
 
     num_threads = os.cpu_count()
     intervals = split_integer_into_intervals(video_offset_max, num_threads)
-    video_download(intervals, movie_uuid, movie_name)
+    # video_download(intervals, movie_uuid, movie_name)
     video_save(movie_name, video_offset_max)
+    delete_directory(movie_name)
