@@ -1,8 +1,9 @@
 import requests
 import re
 import threading
+import paramiko
 import os
-from pathlib import Path
+import shutil
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
@@ -15,10 +16,33 @@ movie_url = 'https://missav.com/dm68/ssis-698'
 
 movie_save_path_root = 'movies'
 
+hostname = "192.168.0.123"
+username = "root"
+password = ""
+
+
+def scp_file(movie_name, hostname, username, password):
+    local_path = movie_save_path_root + '/' + movie_name + '.mp4'
+    remote_path = "/home/workspace/data/stash/data/" + movie_name + '.mp4'
+
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        ssh_client.connect(hostname=hostname, username=username, password=password)
+
+        scp_client = ssh_client.open_sftp()
+        scp_client.put(local_path, remote_path)
+        scp_client.close()
+
+        print(f"file scp success, remote path is: {remote_path}")
+    except Exception as e:
+        print(f"file scp error: {e}")
+    finally:
+        ssh_client.close()
+
 
 def get_movie_uuid(url):
-
-
     html = requests.get(url=url, headers=headers).text
 
     match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
@@ -29,13 +53,14 @@ def get_movie_uuid(url):
     else:
         print("match uuid failed.")
 
+
 def create_folder_if_not_exists(folder_name):
     path = movie_save_path_root + '/' + folder_name
     if not os.path.exists(path):
         os.makedirs(path)
 
-import shutil
-import os
+
+
 
 def delete_directory(movie_name):
     path = movie_save_path_root + '/' + movie_name
@@ -138,6 +163,9 @@ if __name__ == '__main__':
 
     num_threads = os.cpu_count()
     intervals = split_integer_into_intervals(video_offset_max, num_threads)
-    video_download(intervals, movie_uuid, movie_name)
-    video_save(movie_name, video_offset_max)
+    # video_download(intervals, movie_uuid, movie_name)
+    # video_save(movie_name, video_offset_max)
     delete_directory(movie_name)
+    # Transfer files to linux server
+    # such as a stash movie lib
+    scp_file(movie_name, hostname, username, password)
