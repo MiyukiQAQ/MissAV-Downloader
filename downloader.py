@@ -29,6 +29,8 @@ def scp_file(movie_name, hostname, username, password):
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
+        print(f"try scp {movie_name} to {remote_path}")
+
         ssh_client.connect(hostname=hostname, username=username, password=password)
 
         scp_client = ssh_client.open_sftp()
