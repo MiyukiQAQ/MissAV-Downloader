@@ -4,9 +4,10 @@ import threading
 import paramiko
 import os
 import shutil
+import time
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 }
 
 video_m3u8_prefix = 'https://surrit.com/'
@@ -62,8 +63,6 @@ def create_folder_if_not_exists(folder_name):
         os.makedirs(path)
 
 
-
-
 def delete_directory(movie_name):
     path = movie_save_path_root + '/' + movie_name
     try:
@@ -84,10 +83,25 @@ def split_integer_into_intervals(integer, n):
     return intervals
 
 
+def https_request_with_retry(request_url, max_retries=5, delay=2):
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.get(url=request_url, headers=headers, timeout=5).content
+            return response
+        except Exception as e:
+            print(f"Failed to fetch data (attempt {retries + 1}/{max_retries}): {e} url is: {request_url}")
+            retries += 1
+            time.sleep(delay)
+    print(f"Max retries reached. Failed to fetch data. url is: {request_url}")
+    return None
+
+
 def thread_task(start, end, uuid, movie_name):
     for i in range(start, end):
         url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
-        content = requests.get(url=url_tmp, headers=headers, timeout=5).content
+        content = https_request_with_retry(url_tmp)
+        if content is None: continue
         file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
         with open(file_path, 'wb') as file:
             file.write(content)
@@ -112,12 +126,14 @@ def video_download(intervals, uuid, movie_name):
 
 def video_save(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
+    saved_count = 0
     with open(output_file_name, 'wb') as outfile:
-        for i in range(video_offset_max):
+        for i in range(video_offset_max + 1):
             file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
             try:
                 with open(file_path, 'rb') as infile:
                     outfile.write(infile.read())
+                    saved_count = saved_count + 1
                     print('write: ' + file_path)
             except FileNotFoundError:
                 print('not fond: ' + file_path)
@@ -127,6 +143,8 @@ def video_save(movie_name, video_offset_max):
                 continue
 
     print('save complete: ' + output_file_name)
+    print(f'total files count: {video_offset_max + 1} , saved files count: {saved_count}')
+    print('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
 if __name__ == '__main__':
@@ -164,7 +182,7 @@ if __name__ == '__main__':
     create_folder_if_not_exists(movie_name)
 
     num_threads = os.cpu_count()
-    intervals = split_integer_into_intervals(video_offset_max, num_threads)
+    intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
     video_download(intervals, movie_uuid, movie_name)
     video_save(movie_name, video_offset_max)
     delete_directory(movie_name)
