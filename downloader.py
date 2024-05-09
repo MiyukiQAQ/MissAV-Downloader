@@ -13,8 +13,6 @@ headers = {
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 
-movie_url = 'https://missav.com/dm68/ssis-698'
-
 movie_save_path_root = 'movies'
 
 hostname = "192.168.0.123"
@@ -148,44 +146,52 @@ def video_save(movie_name, video_offset_max):
 
 
 if __name__ == '__main__':
-    movie_uuid = get_movie_uuid(movie_url)
+    # List of movie URLs
+    movie_urls = [
+        'https://missav.com/dm13/en/orex-208',
+        'https://missav.com/dm5/en/fone-066',
+        'https://missav.com/dm19/en/cjod-371'
+    ]
 
-    playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
+    for movie_url in movie_urls:
+        movie_uuid = get_movie_uuid(movie_url)
 
-    playlist = requests.get(url=playlist_url, headers=headers).text
+        playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
 
-    # The last line records the highest resolution available for this video
-    # For example: 1280x720/video.m3u8
-    playlist_last_line = playlist.splitlines()[-1]
+        playlist = requests.get(url=playlist_url, headers=headers).text
 
-    resolution = playlist_last_line.split('/')[0]
+        # The last line records the highest resolution available for this video
+        # For example: 1280x720/video.m3u8
+        playlist_last_line = playlist.splitlines()[-1]
 
-    video_m3u8_url = video_m3u8_prefix + movie_uuid + '/' + playlist_last_line
+        resolution = playlist_last_line.split('/')[0]
 
-    # video.m3u8 records all jpeg video units of the video
-    video_m3u8 = requests.get(url=video_m3u8_url, headers=headers).text
+        video_m3u8_url = video_m3u8_prefix + movie_uuid + '/' + playlist_last_line
 
-    # In the penultimate line of video.m3u8, find the maximum jpeg video unit number of the video
-    video_offset_max_str = video_m3u8.splitlines()[-2]
-    # For example:
-    # video1772.jpeg
-    # #EXTINF:5.000000,
-    # video1773.jpeg
-    # #EXTINF:2.500000,
-    # video1774.jpeg
-    # #EXTINF:2.250000,
-    # video1775.jpeg
-    # #EXT-X-ENDLIST
-    video_offset_max = int(re.search(r'(\d+)', video_offset_max_str).group(0))
+        # video.m3u8 records all jpeg video units of the video
+        video_m3u8 = requests.get(url=video_m3u8_url, headers=headers).text
 
-    movie_name = movie_url.split('/')[-1]
-    create_folder_if_not_exists(movie_name)
+        # In the penultimate line of video.m3u8, find the maximum jpeg video unit number of the video
+        video_offset_max_str = video_m3u8.splitlines()[-2]
+        # For example:
+        # video1772.jpeg
+        # #EXTINF:5.000000,
+        # video1773.jpeg
+        # #EXTINF:2.500000,
+        # video1774.jpeg
+        # #EXTINF:2.250000,
+        # video1775.jpeg
+        # #EXT-X-ENDLIST
+        video_offset_max = int(re.search(r'(\d+)', video_offset_max_str).group(0))
 
-    num_threads = os.cpu_count()
-    intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
-    video_download(intervals, movie_uuid, movie_name)
-    video_save(movie_name, video_offset_max)
-    delete_directory(movie_name)
-    # Transfer files to linux server
-    # such as a stash movie lib
-    scp_file(movie_name, hostname, username, password)
+        movie_name = movie_url.split('/')[-1]
+        create_folder_if_not_exists(movie_name)
+
+        num_threads = os.cpu_count()
+        intervals = split_integer_into_intervals(video_offset_max, num_threads)
+        video_download(intervals, movie_uuid, movie_name)
+        video_save(movie_name, video_offset_max)
+        delete_directory(movie_name)
+        # Transfer files to linux server
+        # such as a stash movie lib
+        scp_file(movie_name, hostname, username, password)
