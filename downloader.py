@@ -13,7 +13,10 @@ headers = {
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 
-movie_url = 'https://missav.com/dm68/ssis-698'
+movie_urls = [
+    'https://missav.com/dandy-917',
+    'https://missav.com/sw-950'
+]
 
 movie_save_path_root = 'movies'
 
@@ -97,7 +100,7 @@ def https_request_with_retry(request_url, max_retries=5, delay=2):
     return None
 
 
-def thread_task(start, end, uuid, movie_name):
+def thread_task(start, end, uuid, resolution, movie_name):
     for i in range(start, end):
         url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
         content = https_request_with_retry(url_tmp)
@@ -108,13 +111,13 @@ def thread_task(start, end, uuid, movie_name):
             print('saved: ' + file_path)
 
 
-def video_download(intervals, uuid, movie_name):
+def video_download_jpegs(intervals, uuid, resolution, movie_name):
     thread_task_list = []
 
     for interval in intervals:
         start = interval[0]
         end = interval[1]
-        thread = threading.Thread(target=thread_task, args=(start, end, uuid, movie_name))
+        thread = threading.Thread(target=thread_task, args=(start, end, uuid, resolution, movie_name))
         thread_task_list.append(thread)
 
     for thread in thread_task_list:
@@ -124,7 +127,7 @@ def video_download(intervals, uuid, movie_name):
         thread.join()
 
 
-def video_save(movie_name, video_offset_max):
+def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     saved_count = 0
     with open(output_file_name, 'wb') as outfile:
@@ -147,7 +150,7 @@ def video_save(movie_name, video_offset_max):
     print('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
-if __name__ == '__main__':
+def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True,num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
@@ -181,11 +184,23 @@ if __name__ == '__main__':
     movie_name = movie_url.split('/')[-1]
     create_folder_if_not_exists(movie_name)
 
-    num_threads = os.cpu_count()
+
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
-    video_download(intervals, movie_uuid, movie_name)
-    video_save(movie_name, video_offset_max)
-    delete_directory(movie_name)
+    if download_action:
+        video_download_jpegs(intervals, movie_uuid, resolution, movie_name)
+    if write_action:
+        video_write_jpegs_to_mp4(movie_name, video_offset_max)
+    if delete_action:
+        delete_directory(movie_name)
     # Transfer files to linux server
     # such as a stash movie lib
-    scp_file(movie_name, hostname, username, password)
+    if scp_action:
+        scp_file(movie_name, hostname, username, password)
+
+
+if __name__ == '__main__':
+
+    for url in movie_urls:
+        print("process url: " + url)
+        main(url,scp_action=False)
+        print("process url complete: " + url)

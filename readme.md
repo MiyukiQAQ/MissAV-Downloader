@@ -1,1 +1,1 @@
-change movie_url into yourself
+change movie_urls into yourself
