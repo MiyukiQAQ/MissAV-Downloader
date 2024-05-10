@@ -13,16 +13,41 @@ headers = {
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 
-movie_urls = [
-    'https://missav.com/dandy-917',
-    'https://missav.com/sw-950'
-]
-
 movie_save_path_root = 'movies'
 
-hostname = "192.168.0.123"
-username = "root"
-password = ""
+ssh_server_user_info = {
+    "hostname": "192.168.0.123",
+    "username": "root",
+    "password": "",
+}
+
+href_regex = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
+
+
+def login_get_cookie(missav_user_info):
+    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers)
+    if response.status_code == 200:
+        cookie_info = response.cookies.get_dict()
+        print("cookie:")
+        print(cookie_info)
+    else:
+        print("login failed, check your internet connection or your account info")
+        exit(114514)
+
+    return cookie_info
+
+
+def get_movie_collections(cookie):
+    response = requests.get(url='https://missav.com/saved', cookies=cookie, headers=headers)
+    if response.status_code == 200:
+        html_source = response.text
+        href_matches = re.findall(pattern=href_regex, string=html_source)
+        return href_matches
+
+
+    else:
+        print("get movie collections failed")
+        exit(114514)
 
 
 def scp_file(movie_name, hostname, username, password):
@@ -150,7 +175,7 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     print('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
-def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True,num_threads=os.cpu_count()):
+def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
@@ -184,7 +209,6 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
     movie_name = movie_url.split('/')[-1]
     create_folder_if_not_exists(movie_name)
 
-
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
     if download_action:
         video_download_jpegs(intervals, movie_uuid, resolution, movie_name)
@@ -195,12 +219,45 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
     # Transfer files to linux server
     # such as a stash movie lib
     if scp_action:
-        scp_file(movie_name, hostname, username, password)
+        scp_file(movie_name, ssh_server_user_info["hostname"], ssh_server_user_info["username"], ssh_server_user_info["password"])
 
 
 if __name__ == '__main__':
 
+    # type 1 : custom urls, change movie_urls into yourself
+
+    # type 2 : login your account and download movies in your movie collections
+
+    type = 2
+
+    if type == 1:
+        movie_urls = [
+            'https://missav.com/dandy-917',
+            'https://missav.com/sw-950'
+        ]
+
+    if type == 2:
+
+        missav_user_info = {
+            'email': 'xxxx@xxxx.com',
+            'password': 'xxxx'
+        }
+
+        cookie = login_get_cookie(missav_user_info)
+        movie_urls = get_movie_collections(cookie)
+        print("your movie collection url is: ")
+        for url in movie_urls:
+            print(url)
+
+    start_time = time.time()
+
     for url in movie_urls:
         print("process url: " + url)
-        main(url,scp_action=False)
+        main(url, scp_action=False)
         print("process url complete: " + url)
+
+    end_time = time.time()
+    duration = end_time - start_time
+    hours, remainder = divmod(duration, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    print("download time cost：{:02} h {:02} min {:02} s".format(int(hours), int(minutes), int(seconds)))
