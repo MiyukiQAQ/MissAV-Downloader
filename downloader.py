@@ -21,8 +21,12 @@ ssh_server_user_info = {
     "password": "",
 }
 
-href_regex = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
-
+href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
+href_regex_public_playlist = r'<a href="([^"]+)" alt="'
+def get_public_playlist(url):
+    response = requests.get(url,headers=headers).text
+    href_matches = re.findall(pattern=href_regex_public_playlist, string=response)
+    return list(set(href_matches))
 
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers)
@@ -41,7 +45,7 @@ def get_movie_collections(cookie):
     response = requests.get(url='https://missav.com/saved', cookies=cookie, headers=headers)
     if response.status_code == 200:
         html_source = response.text
-        href_matches = re.findall(pattern=href_regex, string=html_source)
+        href_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
         return href_matches
 
 
@@ -228,7 +232,9 @@ if __name__ == '__main__':
 
     # type 2 : login your account and download movies in your movie collections
 
-    type = 2
+    # type 3 : download from a public playlist url
+
+    type = 3
 
     if type == 1:
         movie_urls = [
@@ -245,7 +251,14 @@ if __name__ == '__main__':
 
         cookie = login_get_cookie(missav_user_info)
         movie_urls = get_movie_collections(cookie)
-        print("your movie collection url is: ")
+        print("your movie urls from collection: ")
+        for url in movie_urls:
+            print(url)
+
+    if type == 3:
+        public_list_url = 'https://missav.com/playlists/ewzoukev'
+        movie_urls = get_public_playlist(public_list_url)
+        print("your movie from public playlist: ")
         for url in movie_urls:
             print(url)
 
