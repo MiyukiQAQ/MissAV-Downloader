@@ -51,7 +51,6 @@ def get_movie_collections(cookie):
 
     else:
         print("get movie collections failed")
-        exit(114514)
 
 
 def scp_file(movie_name, hostname, username, password):
@@ -181,6 +180,8 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
 
 def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
+    if movie_uuid is None:
+        return
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
 
@@ -263,6 +264,11 @@ if __name__ == '__main__':
             print(url)
 
     start_time = time.time()
+
+    if movie_urls is None:
+        print("movie_urls is None")
+        print("exit")
+        exit(114514)
 
     for url in movie_urls:
         print("process url: " + url)
