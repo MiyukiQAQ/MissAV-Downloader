@@ -235,6 +235,13 @@ if __name__ == '__main__':
 
     # type 3 : download from a public playlist url
 
+    proxy_enable = False
+
+    if proxy_enable:
+        print("using proxy enabled")
+        os.environ["http_proxy"] = "http://192.168.0.114:7890"
+        os.environ["https_proxy"] = "http://192.168.0.114:7890"
+
     type = 3
 
     if type == 1:
