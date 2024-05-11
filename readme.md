@@ -1,6 +1,6 @@
 type 1 : custom urls, change movie_urls into yourself
 
-type 2 : login your account and download movies from your movie collections
+type 2 : login your account automatically and download movies from your movie collections
 
 type 3 : download from a public playlist url
 ![public_playlist_url.png](public_playlist_url.png)
