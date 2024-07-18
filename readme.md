@@ -1,3 +1,9 @@
+how to run this：
+I recommend running the downloader.py directly in the PyCharm development environment
+When you copy the movie URL from MissAV, it is best to use the English version of the MissAV page
+
+You need Python 3
+
 type 1 : custom urls, change movie_urls into yourself
 
 type 2 : login your account automatically and download movies from your movie collections
