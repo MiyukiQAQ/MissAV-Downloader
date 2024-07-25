@@ -15,4 +15,7 @@ type 3 : download from a public playlist url
 
 Due to the m3u8 fragment download, the more CPU logical threads there are, the faster the download speed
 
-ps: If you are from an ancient eastern country, then you may need to use a network proxy
+ps: 
+
+1. If you are from an ancient eastern country, then you may need to use a network proxy
+2. If an error occurs during the run, try commenting out the first line of code, using the second line of code, and running again.
