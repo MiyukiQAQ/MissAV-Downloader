@@ -1,4 +1,5 @@
 import requests
+# from curl_cffi import requests
 import re
 import threading
 import paramiko
@@ -24,12 +25,12 @@ ssh_server_user_info = {
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 def get_public_playlist(url):
-    response = requests.get(url,headers=headers).text
+    response = requests.get(url,headers=headers,verify=False).text
     href_matches = re.findall(pattern=href_regex_public_playlist, string=response)
     return list(set(href_matches))
 
 def login_get_cookie(missav_user_info):
-    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers)
+    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers,verify=False)
     if response.status_code == 200:
         cookie_info = response.cookies.get_dict()
         print("cookie:")
@@ -42,7 +43,7 @@ def login_get_cookie(missav_user_info):
 
 
 def get_movie_collections(cookie):
-    response = requests.get(url='https://missav.com/saved', cookies=cookie, headers=headers)
+    response = requests.get(url='https://missav.com/saved', cookies=cookie, headers=headers,verify=False)
     if response.status_code == 200:
         html_source = response.text
         href_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
@@ -77,7 +78,10 @@ def scp_file(movie_name, hostname, username, password):
 
 
 def get_movie_uuid(url):
-    html = requests.get(url=url, headers=headers).text
+    html = requests.get(url=url, headers=headers,verify=False).text
+
+    with open("movie.html", "w") as file:
+        file.write(html)
 
     match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
 
@@ -118,7 +122,7 @@ def https_request_with_retry(request_url, max_retries=5, delay=2):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.get(url=request_url, headers=headers, timeout=5).content
+            response = requests.get(url=request_url, headers=headers, timeout=5,verify=False).content
             return response
         except Exception as e:
             print(f"Failed to fetch data (attempt {retries + 1}/{max_retries}): {e} url is: {request_url}")
@@ -185,7 +189,7 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
 
-    playlist = requests.get(url=playlist_url, headers=headers).text
+    playlist = requests.get(url=playlist_url, headers=headers,verify=False).text
 
     # The last line records the highest resolution available for this video
     # For example: 1280x720/video.m3u8
@@ -196,7 +200,7 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
     video_m3u8_url = video_m3u8_prefix + movie_uuid + '/' + playlist_last_line
 
     # video.m3u8 records all jpeg video units of the video
-    video_m3u8 = requests.get(url=video_m3u8_url, headers=headers).text
+    video_m3u8 = requests.get(url=video_m3u8_url, headers=headers,verify=False).text
 
     # In the penultimate line of video.m3u8, find the maximum jpeg video unit number of the video
     video_offset_max_str = video_m3u8.splitlines()[-2]
@@ -242,7 +246,7 @@ if __name__ == '__main__':
         os.environ["http_proxy"] = "http://192.168.0.114:7890"
         os.environ["https_proxy"] = "http://192.168.0.114:7890"
 
-    type = 3
+    type = 1
 
     if type == 1:
         movie_urls = [
