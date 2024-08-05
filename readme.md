@@ -1,7 +1,9 @@
 Before running the downloader, you need to install the dependent libraries using pip or pip3：
 
 pip install curl_cffi 
+
 pip install paramiko 
+
 pip install requests 
 
 This readme is too ugly. I will make a more beautiful one later.
