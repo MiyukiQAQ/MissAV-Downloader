@@ -42,6 +42,15 @@ def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
         next_page_url = next_page_matches[0]
         recursion_fill_movie_urls_by_page(next_page_url,movie_url_list)
 
+def recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie):
+    html_source = requests.get(url=url,cookies=cookie,headers=headers,verify=False).text
+    movie_url_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
+    movie_url_list.extend(list(set(movie_url_matches)))
+    next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
+    if (len(next_page_matches) == 1):
+        next_page_url = next_page_matches[0]
+        recursion_fill_movie_urls_by_page_with_cookie(next_page_url,movie_url_list,cookie)
+
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers,verify=False)
     if response.status_code == 200:
@@ -56,15 +65,10 @@ def login_get_cookie(missav_user_info):
 
 
 def get_movie_collections(cookie):
-    response = requests.get(url='https://missav.com/saved', cookies=cookie, headers=headers,verify=False)
-    if response.status_code == 200:
-        html_source = response.text
-        href_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
-        return href_matches
-
-
-    else:
-        print("get movie collections failed")
+    movie_url_list = []
+    url = 'https://missav.com/saved'
+    recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie)
+    return movie_url_list
 
 
 def scp_file(movie_name, hostname, username, password):
@@ -284,14 +288,14 @@ if __name__ == '__main__':
 
         cookie = login_get_cookie(missav_user_info)
         movie_urls = get_movie_collections(cookie)
-        print("your movie urls from collection: ")
+        print("your movie urls from your collection (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             print(url)
 
     if type == 3:
         public_list_url = 'https://missav.com/playlists/ewzoukev'
         movie_urls = get_public_playlist(public_list_url)
-        print("your movie from public playlist (total: " + str(len(movie_urls)) + " movies): ")
+        print("your movie urls from public playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             print(url)
 
