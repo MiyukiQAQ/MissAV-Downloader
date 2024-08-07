@@ -183,6 +183,9 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     print(f'total files count: {video_offset_max + 1} , saved files count: {saved_count}')
     print('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
+def is_file_already_exists(movie_name):
+    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
+    return os.path.exists(output_file_name)
 
 def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
@@ -221,6 +224,11 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
     create_folder_if_not_exists(movie_name)
 
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
+
+    if is_file_already_exists(movie_name):
+        print(movie_name + " is already exists, skip download.")
+        return
+    
     if download_action:
         video_download_jpegs(intervals, movie_uuid, resolution, movie_name)
     if write_action:
