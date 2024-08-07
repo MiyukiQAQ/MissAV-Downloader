@@ -82,7 +82,7 @@ def scp_file(movie_name, hostname, username, password):
 def get_movie_uuid(url):
     html = requests.get(url=url, headers=headers,verify=False).text
 
-    with open("movie.html", "w") as file:
+    with open("movie.html", "w", encoding="UTF-8") as file:
         file.write(html)
 
     match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
