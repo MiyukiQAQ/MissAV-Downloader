@@ -26,10 +26,21 @@ ssh_server_user_info = {
 
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
-def get_public_playlist(url):
-    response = requests.get(url,headers=headers,verify=False).text
-    href_matches = re.findall(pattern=href_regex_public_playlist, string=response)
-    return list(set(href_matches))
+href_regex_next_page = r'<a href="([^"]+)" rel="next"'
+
+def get_public_playlist(playlist_url):
+    movie_url_list = []
+    recursion_fill_movie_urls_by_page(playlist_url,movie_url_list)
+    return movie_url_list
+
+def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
+    html_source = requests.get(url=playlist_url,headers=headers,verify=False).text
+    movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
+    movie_url_list.extend(list(set(movie_url_matches)))
+    next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
+    if (len(next_page_matches) == 1):
+        next_page_url = next_page_matches[0]
+        recursion_fill_movie_urls_by_page(next_page_url,movie_url_list)
 
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers,verify=False)
@@ -280,7 +291,7 @@ if __name__ == '__main__':
     if type == 3:
         public_list_url = 'https://missav.com/playlists/ewzoukev'
         movie_urls = get_public_playlist(public_list_url)
-        print("your movie from public playlist: ")
+        print("your movie from public playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             print(url)
 
