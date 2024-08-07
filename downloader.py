@@ -212,6 +212,12 @@ def is_file_already_exists(movie_name):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     return os.path.exists(output_file_name)
 
+def delete_all_subfolders(folder_path):
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        if os.path.isdir(item_path):
+            shutil.rmtree(item_path)
+
 def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
     if movie_uuid is None:
@@ -316,6 +322,12 @@ if __name__ == '__main__':
         print("movie_urls is None")
         print("exit")
         exit(114514)
+
+    # befor download, clean the folder
+    print("clean folder start")
+    delete_all_subfolders(movie_save_path_root)
+    print("clean folder end")
+
 
     for url in movie_urls:
         print("process url: " + url)
