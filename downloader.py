@@ -30,13 +30,23 @@ href_regex_next_page = r'<a href="([^"]+)" rel="next"'
 
 def get_public_playlist(playlist_url):
     movie_url_list = []
+    print()
+    print("Getting all video URLs")
+    print()
     recursion_fill_movie_urls_by_page(playlist_url,movie_url_list)
+    print("All video URLs have been obtained")
+    print()
     return movie_url_list
 
 def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
     html_source = requests.get(url=playlist_url,headers=headers,verify=False).text
     movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
-    movie_url_list.extend(list(set(movie_url_matches)))
+    temp_url_list = list(set(movie_url_matches))
+    movie_url_list.extend(temp_url_list)
+    print("page: " + playlist_url)
+    print("movie url list: ")
+    print(temp_url_list)
+    print()
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
     if (len(next_page_matches) == 1):
         next_page_url = next_page_matches[0]
@@ -298,6 +308,7 @@ if __name__ == '__main__':
         print("your movie urls from public playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             print(url)
+        print()
 
     start_time = time.time()
 
