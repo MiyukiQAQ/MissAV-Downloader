@@ -213,6 +213,8 @@ def is_file_already_exists(movie_name):
     return os.path.exists(output_file_name)
 
 def delete_all_subfolders(folder_path):
+    if not os.path.exists(folder_path):
+        return
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
         if os.path.isdir(item_path):
