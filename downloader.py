@@ -334,6 +334,11 @@ if __name__ == '__main__':
         main(url, scp_action=False)
         print("process url complete: " + url)
 
+    # after download, clean the folder
+    print("clean folder start")
+    delete_all_subfolders(movie_save_path_root)
+    print("clean folder end")
+
     end_time = time.time()
     duration = end_time - start_time
     hours, remainder = divmod(duration, 3600)
