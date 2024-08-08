@@ -6,6 +6,7 @@ import re
 import threading
 import paramiko
 import os
+import subprocess
 import shutil
 import time
 
@@ -208,6 +209,42 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     print(f'total files count: {video_offset_max + 1} , saved files count: {saved_count}')
     print('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
+def generate_input_txt(movie_name, video_offset_max):
+    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
+    find_count = 0
+    with open('input.txt', 'w') as input_txt:
+        for i in range(video_offset_max + 1):
+            file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
+            if os.path.exists(file_path):
+                find_count = find_count + 1
+                input_txt.write(f"file '{file_path}'\n")
+
+    print('complete find jpegs for: ' + output_file_name)
+    print(f'total files count: {video_offset_max + 1} , found files count: {find_count}')
+    print('file integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
+    print()
+
+def generate_mp4_by_ffmpeg(movie_name):
+    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
+    ffmpeg_command = [
+        'ffmpeg',
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', 'input.txt',
+        '-c', 'copy',
+        output_file_name
+    ]
+    try:
+        subprocess.run(ffmpeg_command, check=True)
+        print("ffmpeg execute complete")
+    except subprocess.CalledProcessError as e:
+        print(f"movie name: {movie_name}   ffmpeg execute failed: {e}")
+
+def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max):
+    # make input.txt first
+    generate_input_txt(movie_name, video_offset_max)
+    generate_mp4_by_ffmpeg(movie_name)
+
 def is_file_already_exists(movie_name):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     return os.path.exists(output_file_name)
@@ -220,7 +257,7 @@ def delete_all_subfolders(folder_path):
         if os.path.isdir(item_path):
             shutil.rmtree(item_path)
 
-def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True, num_threads=os.cpu_count()):
+def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True,ffmpeg_action=False, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
@@ -265,7 +302,16 @@ def main(movie_url, download_action=True, write_action=True, delete_action=True,
     if download_action:
         video_download_jpegs(intervals, movie_uuid, resolution, movie_name)
     if write_action:
-        video_write_jpegs_to_mp4(movie_name, video_offset_max)
+        if ffmpeg_action:
+            try:
+                subprocess.run(['ffmpeg', '-version'], check=True)
+            except subprocess.CalledProcessError as e:
+                print("no ffmpeg found, downloader exist")
+                exit(114514)
+
+            video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max)
+        else:
+            video_write_jpegs_to_mp4(movie_name, video_offset_max)
     if delete_action:
         delete_directory(movie_name)
     # Transfer files to linux server
