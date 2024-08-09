@@ -82,6 +82,7 @@ Copy this url and paste it into variable ```public_list_url```, in type 3.
 > Maybe even any MissAV video collection page, it could be an actor’s homepage, a label’s homepage, or a search result page, etc.
 >
 > The following URL is an example：
+> https://missav.com/dm132/actresses/JULIA
 
 ---
 
