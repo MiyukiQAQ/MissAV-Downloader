@@ -78,6 +78,10 @@ Please see the picture below ⬇️
 Copy this url and paste it into variable ```public_list_url```, in type 3.
 
 ![public_playlist_url.png](public_playlist_url.png)
+> [!TIP]
+> Maybe even any MissAV video collection page, it could be an actor’s homepage, a label’s homepage, or a search result page, etc.
+>
+> The following URL is an example：
 
 ---
 
@@ -95,4 +99,5 @@ like this：
         print("process url complete: " + url)
 ```
 
-❗️❗️❗️**But please note that this will only work if you have the ffmpeg program in your operating system and have configured the ffmpeg environment variables!**
+> [!WARNING]
+> **But please note that this will only work if you have the ffmpeg program in your operating system and have configured the ffmpeg environment variables!**
