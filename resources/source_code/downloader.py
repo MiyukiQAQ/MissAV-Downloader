@@ -17,7 +17,7 @@ headers = {
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 
-movie_save_path_root = 'movies'
+movie_save_path_root = '../../movies'
 
 ssh_server_user_info = {
     "hostname": "192.168.0.123",

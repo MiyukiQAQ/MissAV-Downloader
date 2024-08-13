@@ -1,4 +1,66 @@
-# MissAV-Downloader
+# Run with Miyuki CLI
+
+## Installation
+
+Use pip (or pip3) to install third-party libraries required by downloader.
+
+```bash
+pip install curl_cffi
+```
+
+## Usage
+
+```
+[root@miyuki MissAV-Downloader]# python3 miyuki-cli.py --help
+usage: miyuki-cli.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-proxy] [-ffmpeg]
+
+A tool for downloading videos from the "MissAV" website.
+
+Use the -urls  parameter to specify the video URLs to download.
+Use the -auth  parameter to specify the username and password to download the videos collected by the account.
+Use the -plist parameter to specify the public playlist URL to download all videos in the list.
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -urls  [ ...]  Movie URLs, separate multiple URLs with spaces
+  -auth  [ ...]  Username and password, separate with space
+  -plist         Public playlist url
+  -proxy         HTTP(S) proxy
+  -ffmpeg        Enable ffmpeg processing
+
+Examples:
+  python3 miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890
+  python3 miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890
+  python3 miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890
+  python3 miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg
+  python3 miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917
+  python3 miyuki-cli.py -urls https://missav.com/sw-950
+```
+
+## Example
+
+```bash
+[root@miyuki MissAV-Downloader]# python3 miyuki-cli.py -urls https://missav.com/sw-950 -proxy 192.168.0.102:7890
+
+ ██████   ██████  ███                        █████       ███ 
+░░██████ ██████  ░░░                        ░░███       ░░░  
+ ░███░█████░███  ████  █████ ████ █████ ████ ░███ █████ ████ 
+ ░███░░███ ░███ ░░███ ░░███ ░███ ░░███ ░███  ░███░░███ ░░███ 
+ ░███ ░░░  ░███  ░███  ░███ ░███  ░███ ░███  ░██████░   ░███ 
+ ░███      ░███  ░███  ░███ ░███  ░███ ░███  ░███░░███  ░███ 
+ █████     █████ █████ ░░███████  ░░████████ ████ █████ █████
+░░░░░     ░░░░░ ░░░░░   ░░░░░███   ░░░░░░░░ ░░░░ ░░░░░ ░░░░░ 
+                        ███ ░███                             
+                       ░░██████                              
+                        ░░░░░░                               
+
+Miyuki - 2024-08-13 21:50:03 - INFO - Network proxy enabled.
+Miyuki - 2024-08-13 21:50:03 - INFO - Process url: https://missav.com/sw-950
+Miyuki - 2024-08-13 21:50:04 - INFO - Match uuid success: f17fa4f3-4e70-428e-b7ad-441455a56027
+Progress: [##########----------------------------------------] 588/3074
+```
+
+# Run with source code
 
 MissAV-Downloader is a python crawler used to download videos from the MissAV website.
 
@@ -28,13 +90,13 @@ function type 3：
 Use pip (or pip3) to install third-party libraries required by downloader.
 
 ```bash
-pip install paramiko
 pip install curl_cffi
-pip install requests
 ```
 
 ## Usage
 Modify the downloader.py source code and run it. This part of the code is at the bottom.
+
+Path: ```MissAV-Downloader/resources/source_code/downloader.py```
 
 For example, you can change the type value to 2, and then modify ```missav_user_info``` and run it. This will log in to your account and automatically download the videos in your video collection. Or simply change ```movie_urls``` to download the video you want.
 
@@ -77,7 +139,7 @@ Please see the picture below ⬇️
 
 Copy this url and paste it into variable ```public_list_url```, in type 3.
 
-![public_playlist_url.png](public_playlist_url.png)
+![public_playlist_url.png](resources/readme_pics/public_playlist_url.png)
 > [!TIP]
 > Maybe even any MissAV video collection page, it could be an actor’s homepage, a label’s homepage, or a search result page, etc.
 >
