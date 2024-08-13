@@ -283,6 +283,8 @@ def check_ffmpeg_command(ffmpeg):
             return True
         except subprocess.CalledProcessError as e:
             return False
+    else:
+        return True
 
 def check_auth(auth):
 
@@ -305,7 +307,7 @@ def validate_args(args):
         exit(magic_number)
 
     if not check_single_non_none(urls, auth, plist):
-        logging.error("Only one parameter among urls, auth, plist can be used.")
+        logging.error("Only and must one parameter among urls, auth, plist can be used.")
         exit(magic_number)
 
     if not check_auth(auth):
@@ -401,12 +403,12 @@ def main():
                     'Use the -auth  parameter to specify the username and password to download the videos collected by the account.\n'
                     'Use the -plist parameter to specify the public playlist URL to download all videos in the list.\n',
         epilog='Examples:\n'
-               '  python3 miyuki.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
-               '  python3 miyuki.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
-               '  python3 miyuki.py -urls https://missav.com/sw-950 -proxy localhost:7890\n'
-               '  python3 miyuki.py -urls https://missav.com/sw-950 -ffmpeg\n'
-               '  python3 miyuki.py -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
-               '  python3 miyuki.py -urls https://missav.com/sw-950\n',
+               '  python3 miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
+               '  python3 miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
+               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890\n'
+               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg\n'
+               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
+               '  python3 miyuki-cli.py -urls https://missav.com/sw-950\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
