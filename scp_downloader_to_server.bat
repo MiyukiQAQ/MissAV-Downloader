@@ -1,1 +1,0 @@
-scp downloader.py root@192.168.0.123:/home/workspace/python_project/MissAV-Downloader/
