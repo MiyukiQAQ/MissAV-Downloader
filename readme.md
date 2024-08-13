@@ -1,4 +1,4 @@
-# Run with Miyuki CLI
+# 1️⃣Run with Miyuki CLI
 
 ## Installation
 
@@ -60,7 +60,7 @@ Miyuki - 2024-08-13 21:50:04 - INFO - Match uuid success: f17fa4f3-4e70-428e-b7a
 Progress: [##########----------------------------------------] 588/3074
 ```
 
-# Run with source code
+# 2️⃣Run with source code
 
 MissAV-Downloader is a python crawler used to download videos from the MissAV website.
 
