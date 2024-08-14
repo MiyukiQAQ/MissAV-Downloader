@@ -12,29 +12,32 @@ pip install curl_cffi
 
 ```
 [root@miyuki MissAV-Downloader]# python3 miyuki-cli.py --help
-usage: miyuki-cli.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-proxy] [-ffmpeg]
+usage: miyuki-cli.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-search] [-proxy] [-ffmpeg]
 
 A tool for downloading videos from the "MissAV" website.
 
-Use the -urls  parameter to specify the video URLs to download.
-Use the -auth  parameter to specify the username and password to download the videos collected by the account.
-Use the -plist parameter to specify the public playlist URL to download all videos in the list.
+Use the -urls   parameter to specify the video URLs to download.
+Use the -auth   parameter to specify the username and password to download the videos collected by the account.
+Use the -plist  parameter to specify the public playlist URL to download all videos in the list.
+Use the -search parameter to search for movie by serial number and download it.
 
 optional arguments:
   -h, --help     show this help message and exit
   -urls  [ ...]  Movie URLs, separate multiple URLs with spaces
   -auth  [ ...]  Username and password, separate with space
   -plist         Public playlist url
+  -search        Movie serial number
   -proxy         HTTP(S) proxy
   -ffmpeg        Enable ffmpeg processing
 
 Examples:
-  python3 miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890
-  python3 miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890
-  python3 miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890
-  python3 miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg
-  python3 miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917
-  python3 miyuki-cli.py -urls https://missav.com/sw-950
+  python miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890
+  python miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890
+  python miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890
+  python miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg
+  python miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917
+  python miyuki-cli.py -urls https://missav.com/sw-950
+  python miyuki-cli.py -search sw-950
 ```
 
 ## Example
