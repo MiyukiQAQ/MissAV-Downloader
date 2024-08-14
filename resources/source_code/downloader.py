@@ -257,6 +257,17 @@ def delete_all_subfolders(folder_path):
         if os.path.isdir(item_path):
             shutil.rmtree(item_path)
 
+def get_movie_url_by_search(key):
+    search_url = "https://missav.com/search/" + key
+    search_regex = r'<a href="([^"]+)" alt="' + key + '">'
+    html_source = requests.get(url=search_url,headers=headers,verify=False).text
+    movie_url_matches = re.findall(pattern=search_regex, string=html_source)
+    temp_url_list = list(set(movie_url_matches))
+    if (len(temp_url_list) !=0 ):
+        return temp_url_list[0]
+    else:
+        return None
+
 def main(movie_url, download_action=True, write_action=True, delete_action=True, scp_action=True,ffmpeg_action=False, num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
     if movie_uuid is None:
@@ -363,6 +374,15 @@ if __name__ == '__main__':
         for url in movie_urls:
             print(url)
         print()
+
+    if type == 4:
+        search_key = "sw-950"
+        url = get_movie_url_by_search(search_key)
+        if url is not None:
+            print("Search success: " + url)
+            movie_urls = [url]
+        else:
+            print("Search failed.")
 
     start_time = time.time()
 

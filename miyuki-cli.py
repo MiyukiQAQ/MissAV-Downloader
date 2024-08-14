@@ -272,8 +272,8 @@ def delete_all_subfolders(folder_path):
         if os.path.isdir(item_path):
             shutil.rmtree(item_path)
 
-def check_single_non_none(param1, param2, param3):
-    non_none_count = sum(param is not None for param in [param1, param2, param3])
+def check_single_non_none(param1, param2, param3, param4):
+    non_none_count = sum(param is not None for param in [param1, param2, param3, param4])
     return non_none_count == 1
 
 def check_ffmpeg_command(ffmpeg):
@@ -301,13 +301,14 @@ def validate_args(args):
     auth = args.auth
     plist = args.plist
     ffmpeg = args.ffmpeg
+    search = args.search
 
     if not check_ffmpeg_command(ffmpeg):
         logging.error("FFmpeg command status error.")
         exit(magic_number)
 
-    if not check_single_non_none(urls, auth, plist):
-        logging.error("Only and must one parameter among urls, auth, plist can be used.")
+    if not check_single_non_none(urls, auth, plist, search):
+        logging.error("Only and must one parameter among urls, auth, search, plist, can be used.")
         exit(magic_number)
 
     if not check_auth(auth):
@@ -352,6 +353,17 @@ def get_movie_collections(cookie):
     recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie)
     return movie_url_list
 
+def get_movie_url_by_search(key):
+    search_url = "https://missav.com/search/" + key
+    search_regex = r'<a href="([^"]+)" alt="' + key + '">'
+    html_source = requests.get(url=search_url,headers=headers,verify=False).text
+    movie_url_matches = re.findall(pattern=search_regex, string=html_source)
+    temp_url_list = list(set(movie_url_matches))
+    if (len(temp_url_list) !=0 ):
+        return temp_url_list[0]
+    else:
+        return None
+
 def execute_download(args):
 
     urls = args.urls
@@ -359,6 +371,7 @@ def execute_download(args):
     plist = args.plist
     proxy = args.proxy
     ffmpeg = args.ffmpeg
+    search = args.search
 
     if proxy is not None:
         logging.info("Network proxy enabled.")
@@ -387,6 +400,18 @@ def execute_download(args):
         for url in movie_urls:
             logging.info(url)
 
+    if search is not None:
+        url = get_movie_url_by_search(search)
+        if url is not None:
+            logging.info("Search " + search + " success: " + url)
+            movie_urls.append(url)
+        else:
+            logging.error("Search failed, key: " + search)
+
+    if (len(movie_urls)==0):
+        logging.error("No urls found.")
+        exit(magic_number)
+
     for url in movie_urls:
         logging.info("Process url: " + url)
         download(url, ffmpeg_action=ffmpeg)
@@ -399,22 +424,25 @@ def main():
     parser = argparse.ArgumentParser(
         description='A tool for downloading videos from the "MissAV" website.\n'
                     '\n'
-                    'Use the -urls  parameter to specify the video URLs to download.\n'
-                    'Use the -auth  parameter to specify the username and password to download the videos collected by the account.\n'
-                    'Use the -plist parameter to specify the public playlist URL to download all videos in the list.\n',
+                    'Use the -urls   parameter to specify the video URLs to download.\n'
+                    'Use the -auth   parameter to specify the username and password to download the videos collected by the account.\n'
+                    'Use the -plist  parameter to specify the public playlist URL to download all videos in the list.\n'
+                    'Use the -search parameter to search for movie by serial number and download it.\n',
         epilog='Examples:\n'
                '  python miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
                '  python miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
                '  python miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890\n'
                '  python miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg\n'
                '  python miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
-               '  python miyuki-cli.py -urls https://missav.com/sw-950\n',
+               '  python miyuki-cli.py -urls https://missav.com/sw-950\n'
+               '  python miyuki-cli.py -search sw-950\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
     parser.add_argument('-urls', nargs='+', required=False, metavar='', help='Movie URLs, separate multiple URLs with spaces')
     parser.add_argument('-auth', nargs='+', required=False, metavar='', help='Username and password, separate with space')
     parser.add_argument('-plist', type=str, required=False, metavar='', help='Public playlist url')
+    parser.add_argument('-search', type=str, required=False, metavar='', help='Movie serial number')
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
 
