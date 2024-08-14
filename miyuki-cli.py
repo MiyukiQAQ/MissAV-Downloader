@@ -403,12 +403,12 @@ def main():
                     'Use the -auth  parameter to specify the username and password to download the videos collected by the account.\n'
                     'Use the -plist parameter to specify the public playlist URL to download all videos in the list.\n',
         epilog='Examples:\n'
-               '  python3 miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
-               '  python3 miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
-               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890\n'
-               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg\n'
-               '  python3 miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
-               '  python3 miyuki-cli.py -urls https://missav.com/sw-950\n',
+               '  python miyuki-cli.py -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
+               '  python miyuki-cli.py -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
+               '  python miyuki-cli.py -urls https://missav.com/sw-950 -proxy localhost:7890\n'
+               '  python miyuki-cli.py -urls https://missav.com/sw-950 -ffmpeg\n'
+               '  python miyuki-cli.py -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
+               '  python miyuki-cli.py -urls https://missav.com/sw-950\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
