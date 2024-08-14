@@ -407,6 +407,7 @@ def execute_download(args):
             movie_urls.append(url)
         else:
             logging.error("Search failed, key: " + search)
+            exit(magic_number)
 
     if (len(movie_urls)==0):
         logging.error("No urls found.")
