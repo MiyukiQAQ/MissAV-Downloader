@@ -378,8 +378,6 @@ def execute_download(args):
         os.environ["http_proxy"] = f"http://{proxy}"
         os.environ["https_proxy"] = f"http://{proxy}"
 
-    delete_all_subfolders(movie_save_path_root)
-
     movie_urls = []
 
     if urls is not None:
@@ -415,10 +413,10 @@ def execute_download(args):
 
     for url in movie_urls:
         logging.info("Process url: " + url)
+        delete_all_subfolders(movie_save_path_root)
         download(url, ffmpeg_action=ffmpeg)
+        delete_all_subfolders(movie_save_path_root)
         logging.info("Process url complete: " + url)
-
-    delete_all_subfolders(movie_save_path_root)
 
 def main():
 
