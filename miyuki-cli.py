@@ -141,7 +141,8 @@ def generate_input_txt(movie_name, video_offset_max):
                 find_count = find_count + 1
                 input_txt.write(f"file '{file_path}'\n")
 
-    logging.info('complete find jpegs for: ' + output_file_name)
+    logging.info('')
+    logging.info('Complete save jpegs for: ' + output_file_name)
     logging.info(f'total files count: {video_offset_max + 1} , found files count: {find_count}')
     logging.info('file integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
 
