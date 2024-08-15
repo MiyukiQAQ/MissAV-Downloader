@@ -1,3 +1,7 @@
+There are three ways to run it, you just need to choose one.
+
+This readme is still too ugly. I have to find time to rewrite it.🤬
+
 # 1️⃣Run with miyuki
 
 ```bash
