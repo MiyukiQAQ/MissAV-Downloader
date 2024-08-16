@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 magic_number = 114514
-movie_save_path_root = 'movies'
+movie_save_path_root = '../../movies'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
@@ -134,7 +134,7 @@ def generate_mp4_by_ffmpeg(movie_name):
 def generate_input_txt(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     find_count = 0
-    with open('input.txt', 'w') as input_txt:
+    with open('../../input.txt', 'w') as input_txt:
         for i in range(video_offset_max + 1):
             file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
             if os.path.exists(file_path):
@@ -188,7 +188,7 @@ def create_root_folder_if_not_exists(folder_name):
 def get_movie_uuid(url):
     html = requests.get(url=url, headers=headers,verify=False).text
 
-    with open("movie.html", "w", encoding="UTF-8") as file:
+    with open("../../movie.html", "w", encoding="UTF-8") as file:
         file.write(html)
 
     match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
