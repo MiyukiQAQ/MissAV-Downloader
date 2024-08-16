@@ -103,15 +103,15 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
                     saved_count = saved_count + 1
                     print('write: ' + file_path)
             except FileNotFoundError:
-                print('not fond: ' + file_path)
+                print('file not found: ' + file_path)
                 continue
             except Exception as e:
                 print('exception: ' + str(e))
                 continue
 
-    logging.info('save complete: ' + output_file_name)
-    logging.info(f'total files count: {video_offset_max + 1} , saved files count: {saved_count}')
-    logging.info('file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
+    logging.info('Save Completed: ' + output_file_name)
+    logging.info(f'Total number of files: {video_offset_max + 1} , number of files saved: {saved_count}')
+    logging.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
 def generate_mp4_by_ffmpeg(movie_name):
@@ -126,9 +126,9 @@ def generate_mp4_by_ffmpeg(movie_name):
     ]
     try:
         subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL)
-        logging.info("ffmpeg execute complete.")
+        logging.info("FFmpeg execution completed.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"movie name: {movie_name}   ffmpeg execute failed: {e}")
+        logging.error(f"Movie name: {movie_name}, FFmpeg execution failed: {e}")
 
 
 def generate_input_txt(movie_name, video_offset_max):
@@ -194,10 +194,10 @@ def get_movie_uuid(url):
     match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
 
     if match:
-        logging.info("Match uuid success: " + match.group(1))
+        logging.info("Matching uuid successfully: " + match.group(1))
         return match.group(1)
     else:
-        logging.error("Match uuid failed.")
+        logging.error("Failed to match uuid.")
 
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers,verify=False)
@@ -206,7 +206,7 @@ def login_get_cookie(missav_user_info):
         logging.info("cookie:")
         logging.info(cookie_info)
     else:
-        logging.error("login failed, check your internet connection or your account info.")
+        logging.error("Login failed, check your network connection or account information.")
         exit(114514)
 
     return cookie_info
@@ -251,7 +251,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
 
     if is_file_already_exists(movie_name):
-        logging.info(movie_name + " is already exists, skip download.")
+        logging.info(movie_name + " already exists, skip downloading.")
         return
 
     if download_action:
@@ -309,12 +309,12 @@ def validate_args(args):
         exit(magic_number)
 
     if not check_single_non_none(urls, auth, plist, search):
-        logging.error("Only and must one parameter among urls, auth, search, plist, can be used.")
+        logging.error("Among urls, auth, search, plist, only one parameter must be specified.")
         exit(magic_number)
 
     if not check_auth(auth):
-        logging.error("Username and password input format is incorrect.")
-        logging.error("Correct Example: foo@gmail.com password")
+        logging.error("The username and password entered are not in the correct format.")
+        logging.error("Correct example: foo@gmail.com password")
         exit(magic_number)
 
 def recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie):
@@ -331,8 +331,8 @@ def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
     movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
     temp_url_list = list(set(movie_url_matches))
     movie_url_list.extend(temp_url_list)
-    logging.info("page: " + playlist_url)
-    logging.info("movie url list: ")
+    logging.info("Page: " + playlist_url)
+    logging.info("Movie url list: ")
     logging.info(temp_url_list)
     logging.info("")
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
@@ -343,9 +343,9 @@ def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
 
 def get_public_playlist(playlist_url):
     movie_url_list = []
-    logging.info("Getting all video URLs")
+    logging.info("Getting the URLs of all movies.")
     recursion_fill_movie_urls_by_page(playlist_url,movie_url_list)
-    logging.info("All video URLs have been obtained")
+    logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
 def get_movie_collections(cookie):
@@ -389,20 +389,20 @@ def execute_download(args):
         password = auth[1]
         cookie = login_get_cookie({'email':username,'password':password})
         movie_urls = get_movie_collections(cookie)
-        logging.info("your movie urls from your collection (total: " + str(len(movie_urls)) + " movies): ")
+        logging.info("The URLs of all the videos you have favorited (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             logging.info(url)
 
     if plist is not None:
         movie_urls = get_public_playlist(plist)
-        logging.info("your movie urls from public playlist (total: " + str(len(movie_urls)) + " movies): ")
+        logging.info("The URLs of all videos in this playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             logging.info(url)
 
     if search is not None:
         url = get_movie_url_by_search(search)
         if url is not None:
-            logging.info("Search " + search + " success: " + url)
+            logging.info("Search " + search + " successfully: " + url)
             movie_urls.append(url)
         else:
             logging.error("Search failed, key: " + search)
@@ -413,11 +413,11 @@ def execute_download(args):
         exit(magic_number)
 
     for url in movie_urls:
-        logging.info("Process url: " + url)
+        logging.info("Processing URL: " + url)
         delete_all_subfolders(movie_save_path_root)
         download(url, ffmpeg_action=ffmpeg)
         delete_all_subfolders(movie_save_path_root)
-        logging.info("Process url complete: " + url)
+        logging.info("Processing URL Complete: " + url)
 
 def main():
 
