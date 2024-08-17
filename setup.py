@@ -9,7 +9,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'miyuki=pip_package.miyuki:main',
+            'miyuki=miyuki.miyuki:main',
         ],
     },
     author='MiyukiQAQ',
