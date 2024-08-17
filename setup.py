@@ -15,7 +15,7 @@ setup(
     author='MiyukiQAQ',
     author_email='***REMOVED***',
     description='A tool for downloading videos from the "MissAV" website.',
-    long_description=open('README.md').read(),
+    long_description=open('readme.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/MiyukiQAQ/MissAV-Downloader',  # 您的项目主页
     classifiers=[
