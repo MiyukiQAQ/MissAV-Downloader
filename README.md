@@ -14,7 +14,7 @@ pip install miyuki
 
 ![snapshot.png](resources%2Freadme_pics%2Fsnapshot.png)
 
-## 📖 instructions
+## 📖 Instructions
 
 ```
 [root@miyuki ~]# miyuki --help
@@ -46,3 +46,18 @@ Examples:
   miyuki -urls https://missav.com/sw-950
   miyuki -search sw-950
 ```
+
+## ⚠️ Precautions
+
+- If you are from an ancient oriental country, you will most likely need a proxy.
+- Use ffmpeg to synthesize videos for the best experience.
+
+## 👀 About FFmpeg
+
+1. If you want miyuki to use ffmpeg to process the video, use the -ffmpeg parameter.
+2. Please check whether the ffmpeg command is valid before using the -ffmpeg parameter. (e.g. ```ffmpeg -version```)
+3. To install FFmpeg, please refer to https://ffmpeg.org/
+
+## License
+
+MIT
