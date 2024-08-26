@@ -39,10 +39,11 @@ optional arguments:
 
 Examples:
   miyuki -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890
+  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890
+  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
   miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
   miyuki -urls https://missav.com/sw-950 -ffmpeg
-  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
   miyuki -urls https://missav.com/sw-950
   miyuki -search sw-950
 ```
