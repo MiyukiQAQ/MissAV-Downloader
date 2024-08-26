@@ -10,6 +10,12 @@ To install Miyuki from the Python Package Index (PyPI) run:
 pip install miyuki
 ```
 
+To upgrade Miyuki from the Python Package Index (PyPI) run:
+
+```
+pip install --upgrade miyuki
+```
+
 ## 📷 Snapshot
 
 ![snapshot.png](resources%2Freadme_pics%2Fsnapshot.png)
