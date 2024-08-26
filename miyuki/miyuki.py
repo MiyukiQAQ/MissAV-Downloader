@@ -430,10 +430,11 @@ def main():
                     'Use the -search parameter to search for movie by serial number and download it.\n',
         epilog='Examples:\n'
                '  miyuki -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
+               '  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg\n'
                '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
+               '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
                '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
                '  miyuki -urls https://missav.com/sw-950 -ffmpeg\n'
-               '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
                '  miyuki -urls https://missav.com/sw-950\n'
                '  miyuki -search sw-950\n',
         formatter_class=argparse.RawTextHelpFormatter,
