@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='miyuki',
-    version='0.1.8',
+    version='0.1.9',
     packages=find_packages(),
     install_requires=[
         'curl_cffi',
@@ -18,6 +18,10 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/MiyukiQAQ/MissAV-Downloader',
+    project_urls={
+        'Bug Tracker': 'https://github.com/MiyukiQAQ/MissAV-Downloader/issues',
+        'Source Code': 'https://github.com/MiyukiQAQ/MissAV-Downloader',
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
