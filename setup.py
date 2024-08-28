@@ -4,10 +4,6 @@ setup(
     name='miyuki',
     version='0.1.5',
     packages=find_packages(),
-    include_package_data=True,
-    package_data={
-        'resources': ['readme_pics/snapshot.png']
-    },
     install_requires=[
         'curl_cffi',
     ],
