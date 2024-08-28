@@ -18,7 +18,7 @@ pip install --upgrade miyuki
 
 ## 📷 Snapshot
 
-![snapshot.png](https://github.com/MiyukiQAQ/MissAV-Downloader/blob/master/resources/readme_pics/snapshot.png)
+![snapshot.png](https://raw.githubusercontent.com/MiyukiQAQ/MissAV-Downloader/master/resources/readme_pics/snapshot.png)
 
 ## 📖 Instructions
 
