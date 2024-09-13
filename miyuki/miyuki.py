@@ -38,6 +38,7 @@ banner = """
                         ░░░░░░                               
 """
 
+
 def display_progress_bar(max_value, counter):
     bar_length = 50
     current_value = counter.incrementAndGet()
@@ -66,13 +67,15 @@ class ThreadSafeCounter:
         with self._lock:
             return self._count
 
+
 counter = ThreadSafeCounter()
+
 
 def https_request_with_retry(request_url, max_retries=5, delay=2):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.get(url=request_url, headers=headers, timeout=5,verify=False).content
+            response = requests.get(url=request_url, headers=headers, timeout=5, verify=False).content
             return response
         except Exception as e:
             # logging.error(f"Failed to fetch data (attempt {retries + 1}/{max_retries}): {e} url is: {request_url}")
@@ -80,6 +83,7 @@ def https_request_with_retry(request_url, max_retries=5, delay=2):
             time.sleep(delay)
     # logging.error(f"Max retries reached. Failed to fetch data. url is: {request_url}")
     return None
+
 
 def thread_task(start, end, uuid, resolution, movie_name, video_offset_max):
     for i in range(start, end):
@@ -90,6 +94,7 @@ def thread_task(start, end, uuid, resolution, movie_name, video_offset_max):
         with open(file_path, 'wb') as file:
             file.write(content)
         display_progress_bar(video_offset_max + 1, counter)
+
 
 def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
@@ -146,10 +151,12 @@ def generate_input_txt(movie_name, video_offset_max):
     logging.info(f'total files count: {video_offset_max + 1} , found files count: {find_count}')
     logging.info('file integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
 
+
 def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max):
     # make input.txt first
     generate_input_txt(movie_name, video_offset_max)
     generate_mp4_by_ffmpeg(movie_name)
+
 
 def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_max):
     thread_task_list = []
@@ -166,9 +173,11 @@ def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_m
     for thread in thread_task_list:
         thread.join()
 
+
 def is_file_already_exists(movie_name):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     return os.path.exists(output_file_name)
+
 
 def split_integer_into_intervals(integer, n):
     interval_size = integer // n
@@ -180,13 +189,15 @@ def split_integer_into_intervals(integer, n):
 
     return intervals
 
+
 def create_root_folder_if_not_exists(folder_name):
     path = movie_save_path_root + '/' + folder_name
     if not os.path.exists(path):
         os.makedirs(path)
 
+
 def get_movie_uuid(url):
-    html = requests.get(url=url, headers=headers,verify=False).text
+    html = requests.get(url=url, headers=headers, verify=False).text
 
     with open("movie.html", "w", encoding="UTF-8") as file:
         file.write(html)
@@ -199,8 +210,9 @@ def get_movie_uuid(url):
     else:
         logging.error("Failed to match uuid.")
 
+
 def login_get_cookie(missav_user_info):
-    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers,verify=False)
+    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers, verify=False)
     if response.status_code == 200:
         cookie_info = response.cookies.get_dict()
         logging.info("cookie:")
@@ -211,8 +223,9 @@ def login_get_cookie(missav_user_info):
 
     return cookie_info
 
+
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
-         num_threads=os.cpu_count()):
+             num_threads=os.cpu_count()):
     movie_uuid = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
@@ -265,6 +278,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
+
 def delete_all_subfolders(folder_path):
     if not os.path.exists(folder_path):
         return
@@ -273,9 +287,11 @@ def delete_all_subfolders(folder_path):
         if os.path.isdir(item_path):
             shutil.rmtree(item_path)
 
+
 def check_single_non_none(param1, param2, param3, param4):
     non_none_count = sum(param is not None for param in [param1, param2, param3, param4])
     return non_none_count == 1
+
 
 def check_ffmpeg_command(ffmpeg):
     if ffmpeg:
@@ -287,8 +303,8 @@ def check_ffmpeg_command(ffmpeg):
     else:
         return True
 
-def check_auth(auth):
 
+def check_auth(auth):
     if auth is None:
         return True
 
@@ -297,10 +313,22 @@ def check_auth(auth):
     else:
         return True
 
+
+def check_limit(limit):
+    if limit is None:
+        return True
+
+    if limit.isdigit():
+        return int(limit) > 0
+
+    return False
+
+
 def validate_args(args):
     urls = args.urls
     auth = args.auth
     plist = args.plist
+    limit = args.limit
     ffmpeg = args.ffmpeg
     search = args.search
 
@@ -317,59 +345,68 @@ def validate_args(args):
         logging.error("Correct example: foo@gmail.com password")
         exit(magic_number)
 
-def recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie):
-    html_source = requests.get(url=url,cookies=cookie,headers=headers,verify=False).text
+    if not check_limit(limit):
+        logging.error("The limit parameter must be a positive integer.")
+        exit(magic_number)
+
+
+def recursion_fill_movie_urls_by_page_with_cookie(url, movie_url_list, cookie):
+    html_source = requests.get(url=url, cookies=cookie, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
     movie_url_list.extend(list(set(movie_url_matches)))
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
     if (len(next_page_matches) == 1):
         next_page_url = next_page_matches[0]
-        recursion_fill_movie_urls_by_page_with_cookie(next_page_url,movie_url_list,cookie)
+        recursion_fill_movie_urls_by_page_with_cookie(next_page_url, movie_url_list, cookie)
 
-def recursion_fill_movie_urls_by_page(playlist_url,movie_url_list):
-    html_source = requests.get(url=playlist_url,headers=headers,verify=False).text
+
+def recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
+    html_source = requests.get(url=playlist_url, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
     temp_url_list = list(set(movie_url_matches))
-    movie_url_list.extend(temp_url_list)
-    logging.info("Page: " + playlist_url)
-    logging.info("Movie url list: ")
-    logging.info(temp_url_list)
-    logging.info("")
+    for movie_url in temp_url_list:
+        movie_url_list.append(movie_url)
+        logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
+        if limit is not None and len(movie_url_list) >= int(limit):
+            return
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
     if (len(next_page_matches) == 1):
         next_page_url = next_page_matches[0]
-        recursion_fill_movie_urls_by_page(next_page_url,movie_url_list)
+        recursion_fill_movie_urls_by_page(next_page_url, movie_url_list, limit)
 
 
-def get_public_playlist(playlist_url):
+def get_public_playlist(playlist_url, limit):
     movie_url_list = []
     logging.info("Getting the URLs of all movies.")
-    recursion_fill_movie_urls_by_page(playlist_url,movie_url_list)
+    recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
     logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
+
 
 def get_movie_collections(cookie):
     movie_url_list = []
     url = 'https://missav.com/saved'
-    recursion_fill_movie_urls_by_page_with_cookie(url,movie_url_list,cookie)
+    recursion_fill_movie_urls_by_page_with_cookie(url, movie_url_list, cookie)
     return movie_url_list
+
 
 def get_movie_url_by_search(key):
     search_url = "https://missav.com/search/" + key
     search_regex = r'<a href="([^"]+)" alt="' + key + '">'
-    html_source = requests.get(url=search_url,headers=headers,verify=False).text
+    html_source = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=search_regex, string=html_source)
     temp_url_list = list(set(movie_url_matches))
-    if (len(temp_url_list) !=0 ):
+    if (len(temp_url_list) != 0):
         return temp_url_list[0]
     else:
         return None
 
-def execute_download(args):
 
+def execute_download(args):
     urls = args.urls
     auth = args.auth
     plist = args.plist
+    limit = args.limit
     proxy = args.proxy
     ffmpeg = args.ffmpeg
     search = args.search
@@ -387,14 +424,14 @@ def execute_download(args):
     if auth is not None:
         username = auth[0]
         password = auth[1]
-        cookie = login_get_cookie({'email':username,'password':password})
+        cookie = login_get_cookie({'email': username, 'password': password})
         movie_urls = get_movie_collections(cookie)
         logging.info("The URLs of all the videos you have favorited (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             logging.info(url)
 
     if plist is not None:
-        movie_urls = get_public_playlist(plist)
+        movie_urls = get_public_playlist(plist, limit)
         logging.info("The URLs of all videos in this playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             logging.info(url)
@@ -408,7 +445,7 @@ def execute_download(args):
             logging.error("Search failed, key: " + search)
             exit(magic_number)
 
-    if (len(movie_urls)==0):
+    if (len(movie_urls) == 0):
         logging.error("No urls found.")
         exit(magic_number)
 
@@ -419,30 +456,35 @@ def execute_download(args):
         delete_all_subfolders(movie_save_path_root)
         logging.info("Processing URL Complete: " + url)
 
-def main():
 
+def main():
     parser = argparse.ArgumentParser(
         description='A tool for downloading videos from the "MissAV" website.\n'
                     '\n'
                     'Use the -urls   parameter to specify the video URLs to download.\n'
                     'Use the -auth   parameter to specify the username and password to download the videos collected by the account.\n'
                     'Use the -plist  parameter to specify the public playlist URL to download all videos in the list.\n'
-                    'Use the -search parameter to search for movie by serial number and download it.\n',
+                    'Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)\n'
+                    'Use the -search parameter to search for movie by serial number and download it.\n'
+                    'Use the -proxy  parameter to configure http proxy server ip and port.\n'
+                    'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n',
+
         epilog='Examples:\n'
-               '  miyuki -plist https://missav.com/dm132/actresses/JULIA -ffmpeg -proxy localhost:7890\n'
-               '  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg\n'
-               '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg -proxy localhost:7890\n'
+               '  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
+               '  miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg\n'
+               '  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg\n'
+               '  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg -proxy localhost:7890\n'
                '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
                '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
-               '  miyuki -urls https://missav.com/sw-950 -ffmpeg\n'
-               '  miyuki -urls https://missav.com/sw-950\n'
-               '  miyuki -search sw-950\n',
+               '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
+               '  miyuki -search sw-950 -ffmpeg\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument('-urls', nargs='+', required=False, metavar='', help='Movie URLs, separate multiple URLs with spaces')
-    parser.add_argument('-auth', nargs='+', required=False, metavar='', help='Username and password, separate with space')
+    parser.add_argument('-urls', nargs='+', required=False, metavar='',help='Movie URLs, separate multiple URLs with spaces')
+    parser.add_argument('-auth', nargs='+', required=False, metavar='',help='Username and password, separate with space')
     parser.add_argument('-plist', type=str, required=False, metavar='', help='Public playlist url')
+    parser.add_argument('-limit', type=str, required=False, metavar='', help='Limit the number of downloads')
     parser.add_argument('-search', type=str, required=False, metavar='', help='Movie serial number')
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
@@ -454,6 +496,7 @@ def main():
     print(banner)
 
     execute_download(args)
+
 
 if __name__ == "__main__":
     main()
