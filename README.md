@@ -62,9 +62,6 @@ Examples:
   miyuki -search sw-950 -ffmpeg -cover
 ```
 
-## 📗 URL file example
-![snapshot.png](https://raw.githubusercontent.com/MiyukiQAQ/MissAV-Downloader/master/resources/readme_pics/url_file.png)
-
 ## 🤫 The ```-plist``` parameter
 
 Not only public playlists can be downloaded using the -plist parameter. Generally, any page that can be flipped can use the -plist parameter. But please note that if your URL contains an & symbol, you must wrap the URL with " " when using the -plist command.

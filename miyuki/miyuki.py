@@ -509,7 +509,7 @@ def main():
                     'Use the -plist  parameter to specify the public playlist URL to download all videos in the list.\n'
                     'Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)\n'
                     'Use the -search parameter to search for movie by serial number and download it.\n'
-                    'Use the -file   parameter to download all URLs in the file.\n'
+                    'Use the -file   parameter to download all URLs in the file. ( Each line is a URL )\n'
                     'Use the -proxy  parameter to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n'
                     'Use the -cover  parameter to save the cover when downloading the video\n',
