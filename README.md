@@ -24,7 +24,7 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki --help
-usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-proxy] [-ffmpeg]
+usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-proxy] [-ffmpeg] [-cover]
 
 A tool for downloading videos from the "MissAV" website.
 
@@ -35,6 +35,7 @@ Use the -limit  parameter to limit the number of downloads. (Only works with the
 Use the -search parameter to search for movie by serial number and download it.
 Use the -proxy  parameter to configure http proxy server ip and port.
 Use the -ffmpeg parameter to get the best video quality. ( Recommend! )
+Use the -cover  parameter to save the cover when downloading the video
 
 options:
   -h, --help     show this help message and exit
@@ -45,16 +46,17 @@ options:
   -search        Movie serial number
   -proxy         HTTP(S) proxy
   -ffmpeg        Enable ffmpeg processing
+  -cover         Download video cover
 
 Examples:
   miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
   miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg
-  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg
+  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg -cover
   miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg -proxy localhost:7890
   miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
   miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
-  miyuki -search sw-950 -ffmpeg
+  miyuki -search sw-950 -ffmpeg -cover
 ```
 
 ## 🤫 The ```-plist``` parameter
