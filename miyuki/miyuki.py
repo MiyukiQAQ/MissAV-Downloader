@@ -225,7 +225,7 @@ def login_get_cookie(missav_user_info):
 
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
-             num_threads=os.cpu_count()):
+             num_threads=os.cpu_count(), cover_action=True):
     movie_uuid = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
@@ -266,6 +266,12 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
     if is_file_already_exists(movie_name):
         logging.info(movie_name + " already exists, skip downloading.")
         return
+
+    if cover_action:
+        cover_pic_url = f"https://fivetiu.com/{movie_name}/cover-n.jpg"
+        cover_pic = requests.get(url=cover_pic_url, headers=headers, verify=False).content
+        with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
+            file.write(cover_pic)
 
     if download_action:
         counter.reset()
@@ -409,6 +415,7 @@ def execute_download(args):
     limit = args.limit
     proxy = args.proxy
     ffmpeg = args.ffmpeg
+    cover = args.cover
     search = args.search
 
     if proxy is not None:
@@ -452,7 +459,7 @@ def execute_download(args):
     for url in movie_urls:
         logging.info("Processing URL: " + url)
         delete_all_subfolders(movie_save_path_root)
-        download(url, ffmpeg_action=ffmpeg)
+        download(url, ffmpeg_action=ffmpeg, cover_action=cover)
         delete_all_subfolders(movie_save_path_root)
         logging.info("Processing URL Complete: " + url)
 
@@ -467,17 +474,18 @@ def main():
                     'Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)\n'
                     'Use the -search parameter to search for movie by serial number and download it.\n'
                     'Use the -proxy  parameter to configure http proxy server ip and port.\n'
-                    'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n',
+                    'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n'
+                    'Use the -cover  parameter to save the cover when downloading the video\n',
 
         epilog='Examples:\n'
                '  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
                '  miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg\n'
-               '  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg\n'
+               '  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg -cover\n'
                '  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg -proxy localhost:7890\n'
                '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
                '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
                '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
-               '  miyuki -search sw-950 -ffmpeg\n',
+               '  miyuki -search sw-950 -ffmpeg -cover\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -488,6 +496,7 @@ def main():
     parser.add_argument('-search', type=str, required=False, metavar='', help='Movie serial number')
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
+    parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
 
     args = parser.parse_args()
 
