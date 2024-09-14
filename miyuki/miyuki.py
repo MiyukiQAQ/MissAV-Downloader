@@ -371,7 +371,7 @@ def recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
             return
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
     if (len(next_page_matches) == 1):
-        next_page_url = next_page_matches[0]
+        next_page_url = next_page_matches[0].replace('&amp;', '&')
         recursion_fill_movie_urls_by_page(next_page_url, movie_url_list, limit)
 
 
