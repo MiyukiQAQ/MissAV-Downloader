@@ -24,7 +24,7 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki --help
-usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-proxy] [-ffmpeg] [-cover]
+usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover]
 
 A tool for downloading videos from the "MissAV" website.
 
@@ -33,6 +33,7 @@ Use the -auth   parameter to specify the username and password to download the v
 Use the -plist  parameter to specify the public playlist URL to download all videos in the list.
 Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)
 Use the -search parameter to search for movie by serial number and download it.
+Use the -file   parameter to download all URLs in the file.
 Use the -proxy  parameter to configure http proxy server ip and port.
 Use the -ffmpeg parameter to get the best video quality. ( Recommend! )
 Use the -cover  parameter to save the cover when downloading the video
@@ -44,6 +45,7 @@ options:
   -plist         Public playlist url
   -limit         Limit the number of downloads
   -search        Movie serial number
+  -file          File path
   -proxy         HTTP(S) proxy
   -ffmpeg        Enable ffmpeg processing
   -cover         Download video cover
@@ -56,8 +58,12 @@ Examples:
   miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
   miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
+  miyuki -file /home/miyuki/url.txt -ffmpeg
   miyuki -search sw-950 -ffmpeg -cover
 ```
+
+## 📗 URL file example
+![snapshot.png](https://raw.githubusercontent.com/MiyukiQAQ/MissAV-Downloader/master/resources/readme_pics/url_file.png)
 
 ## 🤫 The ```-plist``` parameter
 

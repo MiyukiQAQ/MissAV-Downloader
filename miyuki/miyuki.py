@@ -298,8 +298,8 @@ def delete_all_subfolders(folder_path):
             shutil.rmtree(item_path)
 
 
-def check_single_non_none(param1, param2, param3, param4):
-    non_none_count = sum(param is not None for param in [param1, param2, param3, param4])
+def check_single_non_none(param1, param2, param3, param4, param5):
+    non_none_count = sum(param is not None for param in [param1, param2, param3, param4, param5])
     return non_none_count == 1
 
 
@@ -333,6 +333,20 @@ def check_limit(limit):
 
     return False
 
+def check_file(file_path):
+    if file_path is None:
+        return True
+
+    if not os.path.isfile(file_path):
+        return False
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            file.read()
+    except (UnicodeDecodeError, IOError):
+        return False
+
+    return os.path.getsize(file_path) > 0
 
 def validate_args(args):
     urls = args.urls
@@ -341,13 +355,14 @@ def validate_args(args):
     limit = args.limit
     ffmpeg = args.ffmpeg
     search = args.search
+    file = args.file
 
     if not check_ffmpeg_command(ffmpeg):
         logging.error("FFmpeg command status error.")
         exit(magic_number)
 
-    if not check_single_non_none(urls, auth, plist, search):
-        logging.error("Among urls, auth, search, plist, only one parameter must be specified.")
+    if not check_single_non_none(urls, auth, plist, search, file):
+        logging.error("Among urls, auth, search, plist, file, only one parameter must be specified.")
         exit(magic_number)
 
     if not check_auth(auth):
@@ -357,6 +372,10 @@ def validate_args(args):
 
     if not check_limit(limit):
         logging.error("The limit parameter must be a positive integer.")
+        exit(magic_number)
+
+    if not check_file(file):
+        logging.error("The file parameter must be a valid file path.")
         exit(magic_number)
 
 
@@ -411,6 +430,11 @@ def get_movie_url_by_search(key):
     else:
         return None
 
+def get_urls_from_file(file):
+    with open(file, 'r', encoding='utf-8') as file:
+        urls = file.readlines()
+    urls = [url.strip() for url in urls]
+    return urls
 
 def execute_download(args):
     urls = args.urls
@@ -421,6 +445,7 @@ def execute_download(args):
     ffmpeg = args.ffmpeg
     cover = args.cover
     search = args.search
+    file = args.file
 
     if proxy is not None:
         logging.info("Network proxy enabled.")
@@ -456,6 +481,13 @@ def execute_download(args):
             logging.error("Search failed, key: " + search)
             exit(magic_number)
 
+    if file is not None:
+        movie_urls = get_urls_from_file(file)
+        logging.info("The URLs of all videos in the file (total: " + str(len(movie_urls)) + " movies): ")
+        for url in movie_urls:
+            logging.info(url)
+
+
     if (len(movie_urls) == 0):
         logging.error("No urls found.")
         exit(magic_number)
@@ -477,6 +509,7 @@ def main():
                     'Use the -plist  parameter to specify the public playlist URL to download all videos in the list.\n'
                     'Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)\n'
                     'Use the -search parameter to search for movie by serial number and download it.\n'
+                    'Use the -file   parameter to download all URLs in the file.\n'
                     'Use the -proxy  parameter to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n'
                     'Use the -cover  parameter to save the cover when downloading the video\n',
@@ -489,6 +522,7 @@ def main():
                '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
                '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
                '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
+               '  miyuki -file /home/miyuki/url.txt -ffmpeg\n'
                '  miyuki -search sw-950 -ffmpeg -cover\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
@@ -498,6 +532,7 @@ def main():
     parser.add_argument('-plist', type=str, required=False, metavar='', help='Public playlist url')
     parser.add_argument('-limit', type=str, required=False, metavar='', help='Limit the number of downloads')
     parser.add_argument('-search', type=str, required=False, metavar='', help='Movie serial number')
+    parser.add_argument('-file', type=str, required=False, metavar='', help='File path')
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
     parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
