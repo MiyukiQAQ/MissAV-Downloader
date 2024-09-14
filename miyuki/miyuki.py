@@ -20,6 +20,7 @@ video_playlist_suffix = '/playlist.m3u8'
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
+match_uuid_pattern = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 }
@@ -202,11 +203,14 @@ def get_movie_uuid(url):
     with open("movie.html", "w", encoding="UTF-8") as file:
         file.write(html)
 
-    match = re.search(r'https:\\/\\/sixyik\.com\\/([^\\/]+)\\/seek\\/_0\.jpg', html)
+    match = re.search(match_uuid_pattern, html)
 
     if match:
-        logging.info("Matching uuid successfully: " + match.group(1))
-        return match.group(1)
+        result = match.group(1)
+        resule_str_list = result.split("|")
+        uuid = "-".join(resule_str_list[::-1])
+        logging.info("Matching uuid successfully: " + uuid)
+        return uuid
     else:
         logging.error("Failed to match uuid.")
 
