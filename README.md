@@ -63,7 +63,7 @@ Not only public playlists can be downloaded using the -plist parameter. Generall
 
 For example, you can manually filter all the uncensored videos starring JULIA on the MissAV website and sort them by the number of favorites from most to least. The URL of the page you get is ```https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved``` Since this URL contains an ampersand (&), in order for the command line to correctly treat this ampersand as part of the URL, you need to wrap the URL with a " " symbol. The final command is ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -ffmpeg``` Of course, if you only want to download the first 100 videos, just use -limit 100.
 
-✅ **If you are not sure whether you should wrap the URL with " ", the best way is to just choose to wrap the URL with " "**
+✅ **If you are not sure whether you should wrap the URL with " ", just choose to wrap the URL with " "**
 
 Command Examples:
 - ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg```
