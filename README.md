@@ -28,15 +28,15 @@ usage: miyuki [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-f
 
 A tool for downloading videos from the "MissAV" website.
 
-Use the -urls   parameter to specify the video URLs to download.
-Use the -auth   parameter to specify the username and password to download the videos collected by the account.
-Use the -plist  parameter to specify the public playlist URL to download all videos in the list.
-Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)
-Use the -search parameter to search for movie by serial number and download it.
-Use the -file   parameter to download all URLs in the file. ( Each line is a URL )
-Use the -proxy  parameter to configure http proxy server ip and port.
-Use the -ffmpeg parameter to get the best video quality. ( Recommend! )
-Use the -cover  parameter to save the cover when downloading the video
+Use the -urls   option to specify the video URLs to download.
+Use the -auth   option to specify the username and password to download the videos collected by the account.
+Use the -plist  option to specify the public playlist URL to download all videos in the list.
+Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)
+Use the -search option to search for movie by serial number and download it.
+Use the -file   option to download all URLs in the file. ( Each line is a URL )
+Use the -proxy  option to configure http proxy server ip and port.
+Use the -ffmpeg option to get the best video quality. ( Recommend! )
+Use the -cover  option to save the cover when downloading the video
 
 options:
   -h, --help     show this help message and exit
@@ -62,9 +62,9 @@ Examples:
   miyuki -search sw-950 -ffmpeg -cover
 ```
 
-## 🤫 The ```-plist``` parameter
+## 🤫 The ```-plist``` option
 
-Not only public playlists can be downloaded using the -plist parameter. Generally, any page that can be flipped can use the -plist parameter. But please note that if your URL contains an & symbol, you must wrap the URL with " " when using the -plist command.
+Not only public playlists can be downloaded using the -plist option. Generally, any page that can be flipped can use the -plist option. But please note that if your URL contains an & symbol, you must wrap the URL with " " when using the -plist command.
 
 For example, you can manually filter all the uncensored videos starring JULIA on the MissAV website and sort them by the number of favorites from most to least. The URL of the page you get is ```https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved``` Since this URL contains an ampersand (&), in order for the command line to correctly treat this ampersand as part of the URL, you need to wrap the URL with a " " symbol. The final command is ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -ffmpeg``` Of course, if you only want to download the first 100 videos, just use -limit 100.
 
@@ -86,8 +86,8 @@ Command Examples:
 
 ## 👀 About FFmpeg
 
-1. If you want miyuki to use ffmpeg to process the video, use the -ffmpeg parameter.
-2. Please check whether the ffmpeg command is valid before using the -ffmpeg parameter. (e.g. ```ffmpeg -version```)
+1. If you want miyuki to use ffmpeg to process the video, use the -ffmpeg option.
+2. Please check whether the ffmpeg command is valid before using the -ffmpeg option. (e.g. ```ffmpeg -version```)
 3. To install FFmpeg, please refer to https://ffmpeg.org/
 
 ## License

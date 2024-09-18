@@ -362,7 +362,7 @@ def validate_args(args):
         exit(magic_number)
 
     if not check_single_non_none(urls, auth, plist, search, file):
-        logging.error("Among urls, auth, search, plist, file, only one parameter must be specified.")
+        logging.error("Among -urls, -auth, -search, -plist, and -file, exactly one option must be specified.")
         exit(magic_number)
 
     if not check_auth(auth):
@@ -371,21 +371,24 @@ def validate_args(args):
         exit(magic_number)
 
     if not check_limit(limit):
-        logging.error("The limit parameter must be a positive integer.")
+        logging.error("The -limit option accepts only positive integers.")
         exit(magic_number)
 
     if not check_file(file):
-        logging.error("The file parameter must be a valid file path.")
+        logging.error("The -file option accepts only a valid file path.")
         exit(magic_number)
 
 
 def recursion_fill_movie_urls_by_page_with_cookie(url, movie_url_list, cookie):
     html_source = requests.get(url=url, cookies=cookie, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
-    movie_url_list.extend(list(set(movie_url_matches)))
+    temp_url_list = list(set(movie_url_matches))
+    for movie_url in temp_url_list:
+        movie_url_list.append(movie_url)
+        logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
     next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
     if (len(next_page_matches) == 1):
-        next_page_url = next_page_matches[0]
+        next_page_url = next_page_matches[0].replace('&amp;', '&')
         recursion_fill_movie_urls_by_page_with_cookie(next_page_url, movie_url_list, cookie)
 
 
@@ -504,15 +507,15 @@ def main():
     parser = argparse.ArgumentParser(
         description='A tool for downloading videos from the "MissAV" website.\n'
                     '\n'
-                    'Use the -urls   parameter to specify the video URLs to download.\n'
-                    'Use the -auth   parameter to specify the username and password to download the videos collected by the account.\n'
-                    'Use the -plist  parameter to specify the public playlist URL to download all videos in the list.\n'
-                    'Use the -limit  parameter to limit the number of downloads. (Only works with the -plist parameter.)\n'
-                    'Use the -search parameter to search for movie by serial number and download it.\n'
-                    'Use the -file   parameter to download all URLs in the file. ( Each line is a URL )\n'
-                    'Use the -proxy  parameter to configure http proxy server ip and port.\n'
-                    'Use the -ffmpeg parameter to get the best video quality. ( Recommend! )\n'
-                    'Use the -cover  parameter to save the cover when downloading the video\n',
+                    'Use the -urls   option to specify the video URLs to download.\n'
+                    'Use the -auth   option to specify the username and password to download the videos collected by the account.\n'
+                    'Use the -plist  option to specify the public playlist URL to download all videos in the list.\n'
+                    'Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)\n'
+                    'Use the -search option to search for movie by serial number and download it.\n'
+                    'Use the -file   option to download all URLs in the file. ( Each line is a URL )\n'
+                    'Use the -proxy  option to configure http proxy server ip and port.\n'
+                    'Use the -ffmpeg option to get the best video quality. ( Recommend! )\n'
+                    'Use the -cover  option to save the cover when downloading the video\n',
 
         epilog='Examples:\n'
                '  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
