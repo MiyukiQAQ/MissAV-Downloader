@@ -93,3 +93,7 @@ Command Examples:
 ## License
 
 MIT
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MiyukiQAQ/MissAV-Downloader&type=Date)](https://star-history.com/#MiyukiQAQ/MissAV-Downloader&Date)
