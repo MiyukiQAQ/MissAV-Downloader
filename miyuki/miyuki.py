@@ -177,6 +177,8 @@ def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_m
 
 
 def is_file_already_exists(movie_name):
+    if movie_name is None or movie_name == '':
+        return False
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     return os.path.exists(output_file_name)
 
