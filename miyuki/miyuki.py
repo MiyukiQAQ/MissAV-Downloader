@@ -217,13 +217,16 @@ def get_movie_uuid(url):
     else:
         logging.error("Failed to match uuid.")
 
-def get_movie_title(movie_html):
+def get_movie_title(movie_html, movie_name):
 
     match = re.search(match_title_pattern, movie_html)
 
     if match:
         result = match.group(1)
-        return result.replace("&#039;", "'")
+        result = result.replace("&#039;", "'")
+        if "uncensored-leak" in movie_name:
+            result += " (Uncensored)"
+        return result
 
     return None
 
@@ -249,8 +252,6 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
     movie_uuid, movie_html = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
-
-    movie_title = get_movie_title(movie_html)
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
 
@@ -284,6 +285,8 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
     create_root_folder_if_not_exists(movie_name)
 
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
+
+    movie_title = get_movie_title(movie_html, movie_name)
 
     if is_file_already_exists(movie_name) or is_file_already_exists(movie_title):
         logging.info(movie_name + " already exists, skip downloading.")
