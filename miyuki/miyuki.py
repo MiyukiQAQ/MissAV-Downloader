@@ -221,7 +221,7 @@ def get_movie_title(movie_html):
 
     if match:
         result = match.group(1)
-        return result
+        return result.replace("&#039;", "'")
 
     return None
 
@@ -283,7 +283,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
 
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
 
-    if is_file_already_exists(movie_name):
+    if is_file_already_exists(movie_name) or is_file_already_exists(movie_title):
         logging.info(movie_name + " already exists, skip downloading.")
         return
 
@@ -305,7 +305,6 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
     if movie_title is not None:
-        movie_title = movie_title.replace("&#039;", "'")
         os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
 
 
