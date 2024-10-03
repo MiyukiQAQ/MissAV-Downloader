@@ -21,6 +21,7 @@ href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primar
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
 match_uuid_pattern = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
+match_title_pattern = r'<h1 class="text-base lg:text-lg text-nord6">([^"]+)</h1>'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 }
@@ -210,10 +211,23 @@ def get_movie_uuid(url):
         resule_str_list = result.split("|")
         uuid = "-".join(resule_str_list[::-1])
         logging.info("Matching uuid successfully: " + uuid)
-        return uuid
+        return uuid, html
     else:
         logging.error("Failed to match uuid.")
 
+def get_movie_title(movie_html):
+
+    match = re.search(match_title_pattern, movie_html)
+
+    if match:
+        result = match.group(1)
+        return result
+
+    return None
+
+def write_error_to_text_file(url, e):
+    with open("miyuki_error.txt", "a", encoding="UTF-8") as file:
+        file.write(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} - URL: {url} - Error: {e}\n")
 
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers, verify=False)
@@ -230,9 +244,11 @@ def login_get_cookie(missav_user_info):
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True):
-    movie_uuid = get_movie_uuid(movie_url)
+    movie_uuid, movie_html = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
+
+    movie_title = get_movie_title(movie_html)
 
     playlist_url = video_m3u8_prefix + movie_uuid + video_playlist_suffix
 
@@ -287,6 +303,10 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
             video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max)
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
+
+    if movie_title is not None:
+        movie_title = movie_title.replace("&#039;", "'")
+        os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
 
 
 def delete_all_subfolders(folder_path):
@@ -496,23 +516,30 @@ def execute_download(args):
         exit(magic_number)
 
     for url in movie_urls:
-        logging.info("Processing URL: " + url)
         delete_all_subfolders(movie_save_path_root)
-        download(url, ffmpeg_action=ffmpeg, cover_action=cover)
+        try:
+            logging.info("Processing URL: " + url)
+            download(url, ffmpeg_action=ffmpeg, cover_action=cover)
+            logging.info("Processing URL Complete: " + url)
+        except Exception as e:
+            logging.error(f"Failed to download the movie: {url}, error: {e}")
+            write_error_to_text_file(url, e)
         delete_all_subfolders(movie_save_path_root)
-        logging.info("Processing URL Complete: " + url)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='A tool for downloading videos from the "MissAV" website.\n'
                     '\n'
+                    'Main Options:\n'
                     'Use the -urls   option to specify the video URLs to download.\n'
                     'Use the -auth   option to specify the username and password to download the videos collected by the account.\n'
                     'Use the -plist  option to specify the public playlist URL to download all videos in the list.\n'
-                    'Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)\n'
                     'Use the -search option to search for movie by serial number and download it.\n'
                     'Use the -file   option to download all URLs in the file. ( Each line is a URL )\n'
+                    '\n'
+                    'Additional Options:\n'
+                    'Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)\n'
                     'Use the -proxy  option to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg option to get the best video quality. ( Recommend! )\n'
                     'Use the -cover  option to save the cover when downloading the video\n',

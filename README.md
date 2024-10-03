@@ -28,12 +28,15 @@ usage: miyuki [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-f
 
 A tool for downloading videos from the "MissAV" website.
 
+Main Options:
 Use the -urls   option to specify the video URLs to download.
 Use the -auth   option to specify the username and password to download the videos collected by the account.
 Use the -plist  option to specify the public playlist URL to download all videos in the list.
-Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)
 Use the -search option to search for movie by serial number and download it.
 Use the -file   option to download all URLs in the file. ( Each line is a URL )
+
+Additional Options:
+Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)
 Use the -proxy  option to configure http proxy server ip and port.
 Use the -ffmpeg option to get the best video quality. ( Recommend! )
 Use the -cover  option to save the cover when downloading the video
