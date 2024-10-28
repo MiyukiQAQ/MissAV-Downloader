@@ -293,10 +293,13 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
         return
 
     if cover_action:
-        cover_pic_url = f"https://fivetiu.com/{movie_name}/cover-n.jpg"
-        cover_pic = requests.get(url=cover_pic_url, headers=headers, verify=False).content
-        with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
-            file.write(cover_pic)
+        try:
+            cover_pic_url = f"https://fivetiu.com/{movie_name}/cover-n.jpg"
+            cover_pic = requests.get(url=cover_pic_url, headers=headers, verify=False).content
+            with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
+                file.write(cover_pic)
+        except Exception as e:
+            logging.error(f"Movie name : {movie_name}, failed to download the cover: {e}")
 
     if download_action:
         counter.reset()
@@ -448,7 +451,7 @@ def get_movie_collections(cookie):
 
 def get_movie_url_by_search(key):
     search_url = "https://missav.com/search/" + key
-    search_regex = r'<a href="([^"]+)" alt="' + key + '">'
+    search_regex = r'<a href="([^"]+)" alt="' + key + '" >'
     html_source = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=search_regex, string=html_source)
     temp_url_list = list(set(movie_url_matches))
