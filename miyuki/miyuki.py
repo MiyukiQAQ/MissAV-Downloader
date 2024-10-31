@@ -549,7 +549,9 @@ def main():
                     'Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)\n'
                     'Use the -proxy  option to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg option to get the best video quality. ( Recommend! )\n'
-                    'Use the -cover  option to save the cover when downloading the video\n',
+                    'Use the -cover  option to save the cover when downloading the video\n'
+                    'Use the -noban  option to turn off the miyuki banner when downloading the video\n',
+
 
         epilog='Examples:\n'
                '  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
@@ -573,12 +575,15 @@ def main():
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
     parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
+    parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
+
 
     args = parser.parse_args()
 
     validate_args(args)
 
-    print(banner)
+    if not args.noban:
+        print(banner)
 
     execute_download(args)
 
