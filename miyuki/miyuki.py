@@ -433,11 +433,27 @@ def recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
         next_page_url = next_page_matches[0].replace('&amp;', '&')
         recursion_fill_movie_urls_by_page(next_page_url, movie_url_list, limit)
 
+def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
+    while playlist_url:
+        html_source = requests.get(url=playlist_url, headers=headers, verify=False).text
+        movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
+        temp_url_list = list(set(movie_url_matches))
+        for movie_url in temp_url_list:
+            movie_url_list.append(movie_url)
+            logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
+            if limit is not None and len(movie_url_list) >= int(limit):
+                return
+        next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
+        if len(next_page_matches) == 1:
+            playlist_url = next_page_matches[0].replace('&amp;', '&')
+        else:
+            break
 
 def get_public_playlist(playlist_url, limit):
     movie_url_list = []
     logging.info("Getting the URLs of all movies.")
-    recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
+    # recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
+    loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
     logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
