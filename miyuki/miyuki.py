@@ -246,6 +246,13 @@ def login_get_cookie(missav_user_info):
 
     return cookie_info
 
+def find_last_non_empty_line(text):
+    lines = text.splitlines()
+    for line in reversed(lines):
+        if line.strip():
+            return line
+    logging.error("Failed to find the last non-empty line in m3u8 playlist.")
+    exit(114514)
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True):
@@ -259,7 +266,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
 
     # The last line records the highest resolution available for this video
     # For example: 1280x720/video.m3u8
-    playlist_last_line = playlist.splitlines()[-1]
+    playlist_last_line = find_last_non_empty_line(playlist)
 
     resolution = playlist_last_line.split('/')[0]
 
