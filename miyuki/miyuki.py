@@ -252,7 +252,7 @@ def find_last_non_empty_line(text):
         if line.strip():
             return line
     logging.error("Failed to find the last non-empty line in m3u8 playlist.")
-    exit(114514)
+    raise Exception("Failed to find the last non-empty line in m3u8 playlist.")
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True):
