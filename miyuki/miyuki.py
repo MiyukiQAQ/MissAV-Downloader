@@ -323,11 +323,11 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
-    if movie_title is not None and title_action:
-        os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
-
     with open(RECORD_FILE, 'a', encoding='utf-8') as file:
         file.write(movie_url + '\n')
+
+    if movie_title is not None and title_action:
+        os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
 
 
 def delete_all_subfolders(folder_path):
