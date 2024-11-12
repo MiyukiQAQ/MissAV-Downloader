@@ -23,8 +23,8 @@ href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primar
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
 match_uuid_pattern = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
-match_title_pattern = r'<h1 class="text-base lg:text-lg text-nord6">([^"]+)</h1>'
-# match_title_pattern = r'<title>([^"]+)</title>'
+# match_title_pattern = r'<h1 class="text-base lg:text-lg text-nord6">([^"]+)</h1>'
+match_title_pattern = r'<title>([^"]+)</title>'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 }
