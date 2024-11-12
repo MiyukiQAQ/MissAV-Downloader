@@ -254,7 +254,7 @@ def find_last_non_empty_line(text):
     raise Exception("Failed to find the last non-empty line in m3u8 playlist.")
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
-             num_threads=os.cpu_count(), cover_action=True):
+             num_threads=os.cpu_count(), cover_action=True, title_action=True):
     movie_uuid, movie_html = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
@@ -318,7 +318,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
-    if movie_title is not None:
+    if movie_title is not None and title_action:
         os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
 
 
@@ -498,6 +498,7 @@ def execute_download(args):
     cover = args.cover
     search = args.search
     file = args.file
+    title = args.title
 
     if proxy is not None:
         logging.info("Network proxy enabled.")
@@ -548,7 +549,7 @@ def execute_download(args):
         delete_all_subfolders(movie_save_path_root)
         try:
             logging.info("Processing URL: " + url)
-            download(url, ffmpeg_action=ffmpeg, cover_action=cover)
+            download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title)
             logging.info("Processing URL Complete: " + url)
         except Exception as e:
             logging.error(f"Failed to download the movie: {url}, error: {e}")
@@ -572,7 +573,8 @@ def main():
                     'Use the -proxy  option to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg option to get the best video quality. ( Recommend! )\n'
                     'Use the -cover  option to save the cover when downloading the video\n'
-                    'Use the -noban  option to turn off the miyuki banner when downloading the video\n',
+                    'Use the -noban  option to turn off the miyuki banner when downloading the video\n'
+                    'Use the -title  option to use the full title as the movie file name\n',
 
 
         epilog='Examples:\n'
@@ -598,6 +600,7 @@ def main():
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
     parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
     parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
+    parser.add_argument('-title', action='store_true', required=False, help='Full title as file name')
 
 
     args = parser.parse_args()
