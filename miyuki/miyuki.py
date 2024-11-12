@@ -14,6 +14,8 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 magic_number = 114514
+RECORD_FILE = 'miyuki_downloaded_urls.txt'
+downloaded_urls = set()
 movie_save_path_root = 'miyuki_movies_folder'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
@@ -22,6 +24,7 @@ href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
 match_uuid_pattern = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
 match_title_pattern = r'<h1 class="text-base lg:text-lg text-nord6">([^"]+)</h1>'
+# match_title_pattern = r'<title>([^"]+)</title>'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 }
@@ -176,13 +179,6 @@ def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_m
         thread.join()
 
 
-def is_file_already_exists(movie_name):
-    if movie_name is None or movie_name == '':
-        return False
-    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
-    return os.path.exists(output_file_name)
-
-
 def split_integer_into_intervals(integer, n):
     interval_size = integer // n
     remainder = integer % n
@@ -253,8 +249,22 @@ def find_last_non_empty_line(text):
             return line
     raise Exception("Failed to find the last non-empty line in m3u8 playlist.")
 
+def already_downloaded(url):
+    if os.path.exists(RECORD_FILE):
+        with open(RECORD_FILE, 'r', encoding='utf-8') as file:
+            for line in file:
+                downloaded_urls.add(line.strip())
+    return url in downloaded_urls
+
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True, title_action=True):
+
+    movie_name = movie_url.split('/')[-1]
+
+    if already_downloaded(movie_url):
+        logging.info(movie_name + " already exists, skip downloading.")
+        return
+
     movie_uuid, movie_html = get_movie_uuid(movie_url)
     if movie_uuid is None:
         return
@@ -287,16 +297,11 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
     # #EXT-X-ENDLIST
     video_offset_max = int(re.search(r'(\d+)', video_offset_max_str).group(0))
 
-    movie_name = movie_url.split('/')[-1]
     create_root_folder_if_not_exists(movie_name)
 
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
 
     movie_title = get_movie_title(movie_html, movie_name)
-
-    if is_file_already_exists(movie_name) or is_file_already_exists(movie_title):
-        logging.info(movie_name + " already exists, skip downloading.")
-        return
 
     if cover_action:
         try:
@@ -320,6 +325,9 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
 
     if movie_title is not None and title_action:
         os.rename(f"{movie_save_path_root}/{movie_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
+
+    with open(RECORD_FILE, 'a', encoding='utf-8') as file:
+        file.write(movie_url + '\n')
 
 
 def delete_all_subfolders(folder_path):
