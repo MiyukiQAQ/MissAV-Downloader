@@ -24,7 +24,7 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki --help
-usage: miyuki [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover]
+usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-noban] [-title]
 
 A tool for downloading videos from the "MissAV" website.
 
@@ -40,6 +40,8 @@ Use the -limit  option to limit the number of downloads. (Only works with the -p
 Use the -proxy  option to configure http proxy server ip and port.
 Use the -ffmpeg option to get the best video quality. ( Recommend! )
 Use the -cover  option to save the cover when downloading the video
+Use the -noban  option to turn off the miyuki banner when downloading the video
+Use the -title  option to use the full title as the movie file name
 
 options:
   -h, --help     show this help message and exit
@@ -52,6 +54,8 @@ options:
   -proxy         HTTP(S) proxy
   -ffmpeg        Enable ffmpeg processing
   -cover         Download video cover
+  -noban         Do not display the banner
+  -title         Full title as file name
 
 Examples:
   miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
