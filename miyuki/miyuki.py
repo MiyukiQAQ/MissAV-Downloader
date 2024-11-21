@@ -124,16 +124,36 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     logging.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
-def generate_mp4_by_ffmpeg(movie_name):
+def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
-    ffmpeg_command = [
-        'ffmpeg',
-        '-f', 'concat',
-        '-safe', '0',
-        '-i', 'input.txt',
-        '-c', 'copy',
-        output_file_name
-    ]
+
+    if cover_as_preview:
+        # ffmpeg -i video.mp4 -i cover.jpg -map 1 -map 0 -c copy -disposition:0 attached_pic output.mp4
+        # TODO: add check if file is missing (use of pathlib.Path().isfile())
+        ffmpeg_command = [
+            'ffmpeg',
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', 'input.txt',
+            '-i', movie_save_path_root + '/' + movie_name + '-cover.jpg',
+            '-map', '1',
+            '-map', '0',
+            '-c', 'copy',
+            '-disposition:0', 'attached_pic',
+            output_file_name
+        ]
+
+    else:
+        ffmpeg_command = [
+            'ffmpeg',
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', 'input.txt',
+            '-c', 'copy',
+            output_file_name
+        ]
+
+
     try:
         subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL)
         logging.info("FFmpeg execution completed.")
@@ -157,10 +177,10 @@ def generate_input_txt(movie_name, video_offset_max):
     logging.info('file integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
 
 
-def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max):
+def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview):
     # make input.txt first
     generate_input_txt(movie_name, video_offset_max)
-    generate_mp4_by_ffmpeg(movie_name)
+    generate_mp4_by_ffmpeg(movie_name, cover_as_preview)
 
 
 def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_max):
@@ -257,7 +277,7 @@ def already_downloaded(url):
     return url in downloaded_urls
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
-             num_threads=os.cpu_count(), cover_action=True, title_action=True):
+             num_threads=os.cpu_count(), cover_action=True, title_action=True, cover_as_preview=False):
 
     movie_name = movie_url.split('/')[-1]
 
@@ -319,7 +339,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
 
     if write_action:
         if ffmpeg_action:
-            video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max)
+            video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview)
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
@@ -504,6 +524,7 @@ def execute_download(args):
     proxy = args.proxy
     ffmpeg = args.ffmpeg
     cover = args.cover
+    ffcover = args.ffcover and ffmpeg and cover
     search = args.search
     file = args.file
     title = args.title
@@ -557,7 +578,7 @@ def execute_download(args):
         delete_all_subfolders(movie_save_path_root)
         try:
             logging.info("Processing URL: " + url)
-            download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title)
+            download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover)
             logging.info("Processing URL Complete: " + url)
         except Exception as e:
             logging.error(f"Failed to download the movie: {url}, error: {e}")
@@ -607,6 +628,7 @@ def main():
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
     parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
+    parser.add_argument('-ffcover', action='store_true', required=False, help='Set cover as video preview (-cover and -ffmpeg are requried)')
     parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
     parser.add_argument('-title', action='store_true', required=False, help='Full title as file name')
 
