@@ -126,20 +126,19 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
 
 def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
-
-    if cover_as_preview:
+    cover_file_name = movie_save_path_root + '/' + movie_name + '-cover.jpg'
+    if cover_as_preview and os.path.exists(cover_file_name):
         # ffmpeg -i video.mp4 -i cover.jpg -map 1 -map 0 -c copy -disposition:0 attached_pic output.mp4
-        # TODO: add check if file is missing (use of pathlib.Path().isfile())
         ffmpeg_command = [
             'ffmpeg',
             '-f', 'concat',
             '-safe', '0',
             '-i', 'input.txt',
-            '-i', movie_save_path_root + '/' + movie_name + '-cover.jpg',
-            '-map', '1',
+            '-i', cover_file_name,
             '-map', '0',
+            '-map', '1',
             '-c', 'copy',
-            '-disposition:0', 'attached_pic',
+            '-disposition:v:1', 'attached_pic',
             output_file_name
         ]
 
@@ -159,7 +158,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
         logging.info("FFmpeg execution completed.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Movie name: {movie_name}, FFmpeg execution failed: {e}")
-
+        raise e
 
 def generate_input_txt(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
@@ -415,10 +414,15 @@ def validate_args(args):
     plist = args.plist
     limit = args.limit
     ffmpeg = args.ffmpeg
+    ffcover = args.ffcover
     search = args.search
     file = args.file
 
     if not check_ffmpeg_command(ffmpeg):
+        logging.error("FFmpeg command status error.")
+        exit(magic_number)
+
+    if not check_ffmpeg_command(ffcover):
         logging.error("FFmpeg command status error.")
         exit(magic_number)
 
@@ -524,10 +528,14 @@ def execute_download(args):
     proxy = args.proxy
     ffmpeg = args.ffmpeg
     cover = args.cover
-    ffcover = args.ffcover and ffmpeg and cover
+    ffcover = args.ffcover
     search = args.search
     file = args.file
     title = args.title
+
+    if ffcover:
+        ffmpeg = True
+        cover = True
 
     if proxy is not None:
         logging.info("Network proxy enabled.")
@@ -598,12 +606,13 @@ def main():
                     'Use the -file   option to download all URLs in the file. ( Each line is a URL )\n'
                     '\n'
                     'Additional Options:\n'
-                    'Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)\n'
-                    'Use the -proxy  option to configure http proxy server ip and port.\n'
-                    'Use the -ffmpeg option to get the best video quality. ( Recommend! )\n'
-                    'Use the -cover  option to save the cover when downloading the video\n'
-                    'Use the -noban  option to turn off the miyuki banner when downloading the video\n'
-                    'Use the -title  option to use the full title as the movie file name\n',
+                    'Use the -limit   option to limit the number of downloads. (Only works with the -plist option.)\n'
+                    'Use the -proxy   option to configure http proxy server ip and port.\n'
+                    'Use the -ffmpeg  option to get the best video quality. ( Recommend! )\n'
+                    'Use the -cover   option to save the cover when downloading the video\n'
+                    'Use the -ffcover option to set the cover as the video preview (ffmpeg required)\n'
+                    'Use the -noban   option to turn off the miyuki banner when downloading the video\n'
+                    'Use the -title   option to use the full title as the movie file name\n',
 
 
         epilog='Examples:\n'
@@ -628,7 +637,7 @@ def main():
     parser.add_argument('-proxy', type=str, required=False, metavar='', help='HTTP(S) proxy')
     parser.add_argument('-ffmpeg', action='store_true', required=False, help='Enable ffmpeg processing')
     parser.add_argument('-cover', action='store_true', required=False, help='Download video cover')
-    parser.add_argument('-ffcover', action='store_true', required=False, help='Set cover as video preview (-cover and -ffmpeg are requried)')
+    parser.add_argument('-ffcover', action='store_true', required=False, help='Set cover as preview (ffmpeg required)')
     parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
     parser.add_argument('-title', action='store_true', required=False, help='Full title as file name')
 
