@@ -134,6 +134,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
         # ffmpeg -i video.mp4 -i cover.jpg -map 1 -map 0 -c copy -disposition:0 attached_pic output.mp4
         ffmpeg_command = [
             'ffmpeg',
+            '-loglevel', 'error',
             '-f', 'concat',
             '-safe', '0',
             '-i', FFMPEG_INPUT_FILE,
@@ -148,6 +149,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
     else:
         ffmpeg_command = [
             'ffmpeg',
+            '-loglevel', 'error',
             '-f', 'concat',
             '-safe', '0',
             '-i', FFMPEG_INPUT_FILE,
@@ -157,6 +159,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
 
 
     try:
+        logging.info("FFmpeg executing...")
         subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL)
         logging.info("FFmpeg execution completed.")
     except subprocess.CalledProcessError as e:
