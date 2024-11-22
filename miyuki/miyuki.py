@@ -7,6 +7,7 @@ import shutil
 import threading
 import time
 import sys
+from functools import cache
 from curl_cffi import requests
 
 logging.basicConfig(level=logging.DEBUG,
@@ -126,12 +127,103 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max):
     logging.info(f'Total number of files: {video_offset_max + 1} , number of files saved: {saved_count}')
     logging.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
+def _ffmpeg_get_encoders():
+    # FFmpeg may be complied with support, but hw is not installed
+    # thus FFmpeg will not work in this case, to ensure functionality
+    # we check if the required encoder (video / audio) is available first.
 
-def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
+    ffmpeg_command = [
+            'ffmpeg',
+            '-hide_banner',
+            '-encoders'
+        ]
+    logging.info("Querying FFmpeg Encoders")
+
+    # Query FFmpeg for encoders
+    return str(subprocess.check_output(ffmpeg_command), encoding="utf-8")
+
+def ffmpeg_get_encoders(etype, flavors=()):
+    etype = etype.upper()
+    encoders = _ffmpeg_get_encoders()
+    # Extract only encoders
+    encoders = filter(None, map(lambda x: x.strip(), encoders.split("------")[1].split("\n")))
+
+    # Extract only Video encoders
+    encoders = filter(None, map(lambda x: x.split(' ')[1] if x[0] == etype else None, encoders))
+
+    if len(flavors) > 0:
+        # Extract onlt Video encoders matching flavor
+        encoders = filter(None, map(lambda x: x if any([f in x for f in flavors]) else None, encoders))
+
+    return encoders
+  
+def ffmpeg_benchmark_encoders(encoders, etype):
+    etype = etype.lower()
+    print("Identifying usable encoders (this may take some time)")
+    usable_encoder = []
+    for encoder in encoders:
+        # ffmpeg -f lavfi -i color=black:s=256x256 -c:v <encoder_name> -frames:v 1 -f null - -benchmark
+        ffmpeg_command = [
+            'ffmpeg',
+            '-loglevel', 'quiet',
+            '-hide_banner',
+            '-f', 'lavfi',
+            '-i', 'color=black:s=256x256',
+            f'-c:{etype}', encoder,
+            '-frames:v', '1',
+            '-f', 'null',
+            '-',
+            '-benchmark'
+        ]
+        print("Trying '{:<12}' : ".format(encoder), end="")
+        ret_proc = subprocess.run(ffmpeg_command)
+        if ret_proc.returncode == 0:
+            usable_encoder.append(encoder)
+        print("OK" if  ret_proc.returncode == 0 else 'KO')
+    return tuple(set(usable_encoder))
+
+def encoder_selection(encoders, flavors):
+    # Sort by flavors
+    for index, flavor in enumerate(flavors):
+        for encoder in encoders.copy():
+            if flavor in encoder:
+                encoders.remove(encoder)
+                encoders.insert(index, encoder)
+    return encoders if len(encoders) > 0 else ['copy']
+
+@cache
+def ffmpeg_audio_encoder(flavors=("libopus",)):
+    encoder_type = 'A'
+    flavors = tuple(flavors)
+    encoders = ffmpeg_get_encoders(encoder_type, flavors)
+    usable_encoder = ffmpeg_benchmark_encoders(encoders, encoder_type)
+    usable_encoder = encoder_selection(list(usable_encoder), flavors)
+    print(f"Using Audio encoder {usable_encoder[0]}")
+    return usable_encoder[0]
+
+@cache
+def ffmpeg_video_encoder(flavors=("hevc", "h264")):
+    encoder_type = 'V'
+    flavors = tuple(flavors)
+    encoders = ffmpeg_get_encoders(encoder_type, flavors)
+    usable_encoder = ffmpeg_benchmark_encoders(encoders, encoder_type)
+    usable_encoder = encoder_selection(list(usable_encoder), flavors)
+    print(f"Using Video encoder {usable_encoder[0]}")
+    return usable_encoder[0]
+
+def generate_mp4_by_ffmpeg(movie_name, cover_as_preview, video_reencode, audio_reencode):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     cover_file_name = movie_save_path_root + '/' + movie_name + '-cover.jpg'
+    video_parameter = 'copy'
+    audio_parameter = 'copy'
+
+    if video_reencode:
+        video_parameter = ffmpeg_video_encoder()
+    if audio_reencode:
+        audio_parameter = ffmpeg_audio_encoder()
+
     if cover_as_preview and os.path.exists(cover_file_name):
-        # ffmpeg -i video.mp4 -i cover.jpg -map 1 -map 0 -c copy -disposition:0 attached_pic output.mp4
+        # ffmpeg -loglevel error -f concat -safe 0 -i ffmpeg_input.txt -i cover.jpg -map 0:v -map 0:a -map 1 -c:v hevc_nvenc -c:a libopus -disposition:v:1 attached_pic -y output.mp4
         ffmpeg_command = [
             'ffmpeg',
             '-loglevel', 'error',
@@ -139,9 +231,12 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
             '-safe', '0',
             '-i', FFMPEG_INPUT_FILE,
             '-i', cover_file_name,
-            '-map', '0',
+            '-map', '0:v',
+            '-map', '0:a',
             '-map', '1',
-            '-c', 'copy',
+            '-c:v:0', video_parameter,
+            '-c:a:0', audio_parameter,
+            '-c:v:1', 'copy',
             '-disposition:v:1', 'attached_pic',
             output_file_name
         ]
@@ -153,10 +248,10 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
             '-f', 'concat',
             '-safe', '0',
             '-i', FFMPEG_INPUT_FILE,
-            '-c', 'copy',
+            '-c:v', video_parameter,
+            '-c:a', audio_parameter,
             output_file_name
         ]
-
 
     try:
         logging.info("FFmpeg executing...")
@@ -183,10 +278,10 @@ def generate_input_txt(movie_name, video_offset_max):
     logging.info(f'Total files : {total_files} , downloaded files : {downloaded_files} , completion rate : {completion_rate}')
 
 
-def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview):
+def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview, video_reencode, audio_reencode):
     # make input.txt first
     generate_input_txt(movie_name, video_offset_max)
-    generate_mp4_by_ffmpeg(movie_name, cover_as_preview)
+    generate_mp4_by_ffmpeg(movie_name, cover_as_preview, video_reencode, audio_reencode)
 
 
 def video_download_jpegs(intervals, uuid, resolution, movie_name, video_offset_max):
@@ -283,7 +378,7 @@ def already_downloaded(url):
     return url in downloaded_urls
 
 def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
-             num_threads=os.cpu_count(), cover_action=True, title_action=True, cover_as_preview=False):
+             num_threads=os.cpu_count(), cover_action=True, title_action=True, cover_as_preview=False, video_reencode=False, audio_reencode=False):
 
     movie_name = movie_url.split('/')[-1]
 
@@ -345,7 +440,7 @@ def download(movie_url, download_action=True, write_action=True, delete_action=T
 
     if write_action:
         if ffmpeg_action:
-            video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview)
+            video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview, video_reencode, audio_reencode)
         else:
             video_write_jpegs_to_mp4(movie_name, video_offset_max)
 
@@ -539,6 +634,8 @@ def execute_download(args):
     search = args.search
     file = args.file
     title = args.title
+    video_reencode = args.video_reencode
+    audio_reencode = args.audio_reencode
 
     if ffcover:
         ffmpeg = True
@@ -593,7 +690,8 @@ def execute_download(args):
         delete_all_subfolders(movie_save_path_root)
         try:
             logging.info("Processing URL: " + url)
-            download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover)
+            download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover,
+                        video_reencode=video_reencode, audio_reencode=audio_reencode)
             logging.info("Processing URL Complete: " + url)
         except Exception as e:
             logging.error(f"Failed to download the movie: {url}, error: {e}")
@@ -647,6 +745,8 @@ def main():
     parser.add_argument('-ffcover', action='store_true', required=False, help='Set cover as preview (ffmpeg required)')
     parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
     parser.add_argument('-title', action='store_true', required=False, help='Full title as file name')
+    parser.add_argument('-video-reencode', action='store_true', required=False, help='Enable Video re-encoding (if available)')
+    parser.add_argument('-audio-reencode', action='store_true', required=False, help='Enable Audio re-encoding (if available)')
 
 
     args = parser.parse_args()
