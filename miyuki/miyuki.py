@@ -27,6 +27,7 @@ href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primar
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
 match_uuid_pattern = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
+match_tags_section = r'<a href=\"([^\"]+)\" class=\"text-nord13 font-medium\">'
 # match_title_pattern = r'<h1 class="text-base lg:text-lg text-nord6">([^"]+)</h1>'
 match_title_pattern = r'<title>([^"]+)</title>'
 headers = {
@@ -605,12 +606,37 @@ def get_movie_collections(cookie):
     return movie_url_list
 
 
-def get_movie_url_by_search(key):
+def order_url_by_tags_match(urls, filter_tags, strict=False):
+    #TODO: Implement strict
+    #TODO: Implement in other functions ()
+    f_urls = [None for _ in range(len(urls))]
+    for url in urls:
+        score = 0
+        html = requests.get(url=url, headers=headers).text.lower()
+        allgenre = re.findall(pattern=match_tags_section, string=html)
+
+        # Plain and Stupid : just check in tag in html page
+        # TODO: use of bs4 might be helpful
+
+        for tag in filter_tags:
+            score += int(any([tag in genre for genre in allgenre]))
+        f_urls.insert(len(filter_tags) - score, url)
+
+    if not strict:
+        f_urls = list(filter(None, f_urls))
+    return f_urls
+
+def get_movie_url_by_search(key, filter_tags):
+    key = key.lower()
     search_url = "https://missav.com/search/" + key
-    search_regex = r'<a href="([^"]+)" alt="' + key + '" >'
+    search_regex = r'<a href="([^"]+)" alt="' + key + r'([\-a-z]*)" >'
     html_source = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=search_regex, string=html_source)
-    temp_url_list = list(set(movie_url_matches))
+    temp_url_list = list(map(lambda x:x[0], set(movie_url_matches)))
+
+    if len(filter_tags) > 0 and len(temp_url_list) > 1:
+        print("Looking for best maching url with matching tags")
+        temp_url_list = order_url_by_tags_match(temp_url_list, filter_tags)
     if (len(temp_url_list) != 0):
         return temp_url_list[0]
     else:
@@ -644,6 +670,7 @@ def execute_download(args):
     title = args.title
     video_reencode = args.video_reencode
     audio_reencode = args.audio_reencode
+    filter_tags = list(map(lambda x: x.strip().lower(), args.tags.split(",")))
 
     if ffcover:
         ffmpeg = True
@@ -675,7 +702,7 @@ def execute_download(args):
             logging.info(url)
 
     if search is not None:
-        url = get_movie_url_by_search(search)
+        url = get_movie_url_by_search(search, filter_tags)
         if url is not None:
             logging.info("Search " + search + " successfully: " + url)
             movie_urls.append(url)
@@ -684,7 +711,7 @@ def execute_download(args):
             exit(magic_number)
 
     if file is not None:
-        movie_urls = get_urls_from_file(file)
+        movie_urls = get_urls_from_file(file, filter_tags)
         logging.info("The URLs of all videos in the file (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
             logging.info(url)
@@ -753,6 +780,7 @@ def main():
     parser.add_argument('-ffcover', action='store_true', required=False, help='Set cover as preview (ffmpeg required)')
     parser.add_argument('-noban', action='store_true', required=False, help='Do not display the banner')
     parser.add_argument('-title', action='store_true', required=False, help='Full title as file name')
+    parser.add_argument('-tags', type=str, required=False, default='', help='Set tags to use when fetching videos, coma separated')
     parser.add_argument('-video-reencode', action='store_true', required=False, help='Enable Video re-encoding (if available)')
     parser.add_argument('-audio-reencode', action='store_true', required=False, help='Enable Audio re-encoding (if available)')
 
