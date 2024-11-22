@@ -178,8 +178,8 @@ def generate_input_txt(movie_name, video_offset_max):
 
     print()
     logging.info('Complete save jpegs for: ' + output_file_name)
-    logging.info(f'total files count: {video_offset_max + 1} , found files count: {find_count}')
-    logging.info('file integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
+    logging.info(f'Total files count: {video_offset_max + 1} , found files count: {find_count}')
+    logging.info('File integrity is {:.2%}'.format(find_count / (video_offset_max + 1)))
 
 
 def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview):
