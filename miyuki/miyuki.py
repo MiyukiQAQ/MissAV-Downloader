@@ -642,10 +642,19 @@ def get_movie_url_by_search(key, filter_tags):
     else:
         return None
 
-def get_urls_from_file(file):
+def get_urls_from_file(file, filter_tags):
+    urls = []
     with open(file, 'r', encoding='utf-8') as file:
-        urls = file.readlines()
-    urls = [url.strip() for url in urls]
+        for url in file.readlines():
+            url = url.strip()
+            if re.search(r'^[a-z]+\-[0-9]+$',  url.lower()):
+                key = url.lower()
+                url = get_movie_url_by_search(key, filter_tags)
+                if url is None:
+                    continue
+                print(f"Found url {url} for {key}")
+            urls.append(url)
+    return urls
 
 def execute_download(args):
     urls = args.urls
