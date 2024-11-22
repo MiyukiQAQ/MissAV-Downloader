@@ -26,7 +26,7 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki --help
-usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-noban] [-title]
+usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title]
 
 A tool for downloading videos from the "MissAV" website.
 
@@ -38,12 +38,13 @@ Use the -search option to search for movie by serial number and download it.
 Use the -file   option to download all URLs in the file. ( Each line is a URL )
 
 Additional Options:
-Use the -limit  option to limit the number of downloads. (Only works with the -plist option.)
-Use the -proxy  option to configure http proxy server ip and port.
-Use the -ffmpeg option to get the best video quality. ( Recommend! )
-Use the -cover  option to save the cover when downloading the video
-Use the -noban  option to turn off the miyuki banner when downloading the video
-Use the -title  option to use the full title as the movie file name
+Use the -limit   option to limit the number of downloads. (Only works with the -plist option.)
+Use the -proxy   option to configure http proxy server ip and port.
+Use the -ffmpeg  option to get the best video quality. ( Recommend! )
+Use the -cover   option to save the cover when downloading the video
+Use the -ffcover option to set the cover as the video preview (ffmpeg required)
+Use the -noban   option to turn off the miyuki banner when downloading the video
+Use the -title   option to use the full title as the movie file name
 
 options:
   -h, --help     show this help message and exit
@@ -56,6 +57,7 @@ options:
   -proxy         HTTP(S) proxy
   -ffmpeg        Enable ffmpeg processing
   -cover         Download video cover
+  -ffcover       Set cover as preview (ffmpeg required)
   -noban         Do not display the banner
   -title         Full title as file name
 
@@ -68,7 +70,7 @@ Examples:
   miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
   miyuki -file /home/miyuki/url.txt -ffmpeg
-  miyuki -search sw-950 -ffmpeg -cover
+  miyuki -search sw-950 -ffcover
 ```
 
 ## 🤫 The ```-plist``` option
