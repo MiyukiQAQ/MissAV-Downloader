@@ -14,9 +14,12 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 magic_number = 114514
-RECORD_FILE = 'miyuki_downloaded_urls.txt'
+RECORD_FILE = 'downloaded_urls_miyuki.txt'
+FFMPEG_INPUT_FILE = 'ffmpeg_input_miyuki.txt'
+ERROR_RECORD_FILE = 'error_records_miyuki.txt'
+TMP_THML_FILE = 'tmp_movie_miyuki.html'
 downloaded_urls = set()
-movie_save_path_root = 'miyuki_movies_folder'
+movie_save_path_root = 'movies_folder_miyuki'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
@@ -133,7 +136,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
             'ffmpeg',
             '-f', 'concat',
             '-safe', '0',
-            '-i', 'input.txt',
+            '-i', FFMPEG_INPUT_FILE,
             '-i', cover_file_name,
             '-map', '0',
             '-map', '1',
@@ -147,7 +150,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
             'ffmpeg',
             '-f', 'concat',
             '-safe', '0',
-            '-i', 'input.txt',
+            '-i', FFMPEG_INPUT_FILE,
             '-c', 'copy',
             output_file_name
         ]
@@ -163,7 +166,7 @@ def generate_mp4_by_ffmpeg(movie_name, cover_as_preview):
 def generate_input_txt(movie_name, video_offset_max):
     output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     find_count = 0
-    with open('input.txt', 'w') as input_txt:
+    with open(FFMPEG_INPUT_FILE, 'w') as input_txt:
         for i in range(video_offset_max + 1):
             file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
             if os.path.exists(file_path):
@@ -218,7 +221,7 @@ def create_root_folder_if_not_exists(folder_name):
 def get_movie_uuid(url):
     html = requests.get(url=url, headers=headers, verify=False).text
 
-    with open("movie.html", "w", encoding="UTF-8") as file:
+    with open(TMP_THML_FILE, "w", encoding="UTF-8") as file:
         file.write(html)
 
     match = re.search(match_uuid_pattern, html)
@@ -246,7 +249,7 @@ def get_movie_title(movie_html, movie_name):
     return None
 
 def write_error_to_text_file(url, e):
-    with open("miyuki_error.txt", "a", encoding="UTF-8") as file:
+    with open(ERROR_RECORD_FILE, "a", encoding="UTF-8") as file:
         file.write(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} - URL: {url} - Error: {e}\n")
 
 def login_get_cookie(missav_user_info):
