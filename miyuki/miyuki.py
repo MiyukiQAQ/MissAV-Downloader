@@ -282,7 +282,7 @@ def already_downloaded(url):
                 downloaded_urls.add(line.strip())
     return url in downloaded_urls
 
-def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
+def download(movie_url, download_action=True, write_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True, title_action=True, cover_as_preview=False):
 
     movie_name = movie_url.split('/')[-1]
