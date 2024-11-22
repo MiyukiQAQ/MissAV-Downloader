@@ -624,7 +624,7 @@ def main():
                '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
                '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
                '  miyuki -file /home/miyuki/url.txt -ffmpeg\n'
-               '  miyuki -search sw-950 -ffmpeg -cover\n',
+               '  miyuki -search sw-950 -ffcover\n',
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
