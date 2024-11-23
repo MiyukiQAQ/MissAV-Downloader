@@ -18,7 +18,7 @@ magic_number = 114514
 RECORD_FILE = 'downloaded_urls_miyuki.txt'
 FFMPEG_INPUT_FILE = 'ffmpeg_input_miyuki.txt'
 ERROR_RECORD_FILE = 'error_records_miyuki.txt'
-TMP_THML_FILE = 'tmp_movie_miyuki.html'
+TMP_HTML_FILE = 'tmp_movie_miyuki.html'
 downloaded_urls = set()
 movie_save_path_root = 'movies_folder_miyuki'
 video_m3u8_prefix = 'https://surrit.com/'
@@ -321,7 +321,7 @@ def create_root_folder_if_not_exists(folder_name):
 def get_movie_uuid(url):
     html = requests.get(url=url, headers=headers, verify=False).text
 
-    with open(TMP_THML_FILE, "w", encoding="UTF-8") as file:
+    with open(TMP_HTML_FILE, "w", encoding="UTF-8") as file:
         file.write(html)
 
     match = re.search(match_uuid_pattern, html)
@@ -378,9 +378,8 @@ def already_downloaded(url):
                 downloaded_urls.add(line.strip())
     return url in downloaded_urls
 
-def download(movie_url, download_action=True, write_action=True, delete_action=True, ffmpeg_action=False,
+def download(movie_url, download_action=True, write_action=True, ffmpeg_action=False,
              num_threads=os.cpu_count(), cover_action=True, title_action=True, cover_as_preview=False, video_reencode=False, audio_reencode=False):
-
     movie_name = movie_url.split('/')[-1]
 
     if already_downloaded(movie_url):
