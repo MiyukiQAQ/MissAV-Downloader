@@ -25,7 +25,7 @@ pip install --upgrade miyuki
 ## 📖 Instructions
 
 ```
-[root@miyuki ~]# miyuki --help
+[root@miyuki ~]# miyuki -h
 usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title]
 
 A tool for downloading videos from the "MissAV" website.
@@ -64,8 +64,8 @@ options:
 Examples:
   miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
   miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg
-  miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg -cover
-  miyuki -plist https://missav.com/playlists/ewzoukev -ffmpeg -proxy localhost:7890
+  miyuki -plist "https://missav.com/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover
+  miyuki -plist "https://missav.com/playlists/ewzoukev" -ffmpeg -proxy localhost:7890
   miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
   miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
@@ -75,20 +75,18 @@ Examples:
 
 ## 🤫 The ```-plist``` option
 
-Not only public playlists can be downloaded using the -plist option. Generally, any page that can be flipped can use the -plist option. But please note that if your URL contains an & symbol, you must wrap the URL with " " when using the -plist command.
-
-For example, you can manually filter all the uncensored videos starring JULIA on the MissAV website and sort them by the number of favorites from most to least. The URL of the page you get is ```https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved``` Since this URL contains an ampersand (&), in order for the command line to correctly treat this ampersand as part of the URL, you need to wrap the URL with a " " symbol. The final command is ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -ffmpeg``` Of course, if you only want to download the first 100 videos, just use -limit 100.
-
-✅ **If you are not sure whether you should wrap the URL with " ", just choose to wrap the URL with " "**
+- Use the -plist option to download movies from a playlist.
+- This playlist can be a public playlist created by your own account, or any playlist displayed based on search results or tag filters.
+- **You should wrap the playlist URL with " " when you use the -plist option.**
 
 Command Examples:
 - ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg```
 - ```miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg```
-- ```miyuki -plist https://missav.com/dm132/actresses/JULIA -limit 20 -ffmpeg```
-- ```miyuki -plist https://missav.com/playlists/ewzoukev -limit 20 -ffmpeg```
-- ```miyuki -plist https://missav.com/dm444/en/labels/WANZ -limit 20 -ffmpeg```
-- ```miyuki -plist https://missav.com/dm21/en/makers/Takara%20Visual -limit 20 -ffmpeg```
-- ```miyuki -plist https://missav.com/dm1/en/genres/4K -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.com/dm132/actresses/JULIA" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.com/playlists/ewzoukev" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.com/dm444/en/labels/WANZ" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.com/dm21/en/makers/Takara%20Visual" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.com/dm1/en/genres/4K" -limit 20 -ffmpeg```
 
 ## ⚠️ Precautions
 
