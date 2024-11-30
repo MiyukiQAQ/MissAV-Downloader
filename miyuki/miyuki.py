@@ -450,37 +450,9 @@ def validate_args(args):
         logging.error("The -file option accepts only a valid file path.")
         exit(magic_number)
 
-
-def recursion_fill_movie_urls_by_page_with_cookie(url, movie_url_list, cookie):
-    html_source = requests.get(url=url, cookies=cookie, headers=headers, verify=False).text
-    movie_url_matches = re.findall(pattern=href_regex_movie_collection, string=html_source)
-    temp_url_list = list(set(movie_url_matches))
-    for movie_url in temp_url_list:
-        movie_url_list.append(movie_url)
-        logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
-    next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
-    if (len(next_page_matches) == 1):
-        next_page_url = next_page_matches[0].replace('&amp;', '&')
-        recursion_fill_movie_urls_by_page_with_cookie(next_page_url, movie_url_list, cookie)
-
-
-def recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
-    html_source = requests.get(url=playlist_url, headers=headers, verify=False).text
-    movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
-    temp_url_list = list(set(movie_url_matches))
-    for movie_url in temp_url_list:
-        movie_url_list.append(movie_url)
-        logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
-        if limit is not None and len(movie_url_list) >= int(limit):
-            return
-    next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
-    if (len(next_page_matches) == 1):
-        next_page_url = next_page_matches[0].replace('&amp;', '&')
-        recursion_fill_movie_urls_by_page(next_page_url, movie_url_list, limit)
-
-def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
+def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit, cookie):
     while playlist_url:
-        html_source = requests.get(url=playlist_url, headers=headers, verify=False).text
+        html_source = requests.get(url=playlist_url, headers=headers, verify=False, cookies=cookie).text
         movie_url_matches = re.findall(pattern=href_regex_public_playlist, string=html_source)
         temp_url_list = list(set(movie_url_matches))
         for movie_url in temp_url_list:
@@ -497,8 +469,7 @@ def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit):
 def get_public_playlist(playlist_url, limit):
     movie_url_list = []
     logging.info("Getting the URLs of all movies.")
-    # recursion_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
-    loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit)
+    loop_fill_movie_urls_by_page(playlist_url=playlist_url, movie_url_list=movie_url_list, limit=limit, cookie=None)
     logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
@@ -506,7 +477,8 @@ def get_public_playlist(playlist_url, limit):
 def get_movie_collections(cookie):
     movie_url_list = []
     url = 'https://missav.com/saved'
-    recursion_fill_movie_urls_by_page_with_cookie(url, movie_url_list, cookie)
+    loop_fill_movie_urls_by_page(playlist_url=url, movie_url_list=movie_url_list, limit=None, cookie=cookie)
+    logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
 
