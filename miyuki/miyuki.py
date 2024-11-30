@@ -260,13 +260,12 @@ def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers, verify=False)
     if response.status_code == 200:
         cookie_info = response.cookies.get_dict()
-        logging.info("cookie:")
-        logging.info(cookie_info)
-    else:
-        logging.error("Login failed, check your network connection or account information.")
-        exit(114514)
+        if "user_uuid" in cookie_info:
+            logging.info("User uuid: " + cookie_info["user_uuid"])
+            return cookie_info
 
-    return cookie_info
+    logging.error("Login failed, check your network connection or account information.")
+    exit(magic_number)
 
 def find_last_non_empty_line(text):
     lines = text.splitlines()
