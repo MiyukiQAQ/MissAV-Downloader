@@ -103,6 +103,30 @@ Command Examples:
 
 MIT
 
+## Disclaimer
+
+This project is licensed under the [MIT License](LICENSE). The following additional disclaimers and notices apply:
+
+### 1. Legal Compliance
+- This software is provided solely for **communication, research, learning, and personal use**.  
+- Users are responsible for ensuring that their use of this software complies with all applicable laws and regulations in their jurisdiction.  
+- The software must not be used for any unlawful, unethical, or unauthorized purposes, including but not limited to violating third-party rights or legal restrictions.
+
+### 2. No Warranty
+As stated in the MIT License:  
+> "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT."
+
+### 3. Limitation of Liability
+- The author(s) shall not be held liable for any claims, damages, or other liabilities arising from or in connection with the use or performance of this software.  
+- Users bear all risks and responsibilities for the use of this software, including but not limited to data loss, system damage, or legal consequences.
+
+### 4. Third-Party Dependencies
+- This project may include or depend on third-party libraries or tools. Users are responsible for reviewing and complying with the licenses and terms of these dependencies.
+
+### 5. Security and Privacy
+- This software may interact with user systems, networks, or data. Users should implement appropriate security measures to protect sensitive information and infrastructure.  
+- The authors are not responsible for any security vulnerabilities or data breaches resulting from the use of this software.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=MiyukiQAQ/MissAV-Downloader&type=Date)](https://star-history.com/#MiyukiQAQ/MissAV-Downloader&Date)
