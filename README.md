@@ -99,7 +99,7 @@ Command Examples:
 2. Please check whether the ffmpeg command is valid before using the -ffmpeg option. (e.g. ```ffmpeg -version```)
 3. To install FFmpeg, please refer to https://ffmpeg.org/
 
-## ❗ Disclaimer
+## 📄 Disclaimer
 
 This project is licensed under the [MIT License](LICENSE). The following additional disclaimers and notices apply:
 
