@@ -1,8 +1,8 @@
 ![MissAV-Downloader](https://socialify.git.ci/MiyukiQAQ/MissAV-Downloader/image?description=1&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
 
-# Miyuki
+## ⭐️ Miyuki
 
-⭐️ A tool for downloading videos from the "MissAV" website.
+A tool for downloading videos from the "MissAV" website.
 
 ## ⚙️ Installation
 
@@ -73,7 +73,7 @@ Examples:
   miyuki -search sw-950 -ffcover
 ```
 
-## 🤫 The ```-plist``` option
+## 💬 The ```-plist``` option
 
 - Use the -plist option to download movies from a playlist.
 - This playlist can be a public playlist created by your own account, or any playlist displayed based on search results or tag filters.
@@ -88,7 +88,7 @@ Command Examples:
 - ```miyuki -plist "https://missav.com/dm21/en/makers/Takara%20Visual" -limit 20 -ffmpeg```
 - ```miyuki -plist "https://missav.com/dm1/en/genres/4K" -limit 20 -ffmpeg```
 
-## ⚠️ Precautions
+## 💡 Precautions
 
 - If you are from an ancient oriental country, you will most likely need a proxy.
 - Use ffmpeg to synthesize videos for the best experience.
@@ -99,7 +99,7 @@ Command Examples:
 2. Please check whether the ffmpeg command is valid before using the -ffmpeg option. (e.g. ```ffmpeg -version```)
 3. To install FFmpeg, please refer to https://ffmpeg.org/
 
-## Disclaimer
+## ❗❗ Disclaimer
 
 This project is licensed under the [MIT License](LICENSE). The following additional disclaimers and notices apply:
 
@@ -123,6 +123,6 @@ As stated in the MIT License:
 - This software may interact with user systems, networks, or data. Users should implement appropriate security measures to protect sensitive information and infrastructure.  
 - The authors are not responsible for any security vulnerabilities or data breaches resulting from the use of this software.
 
-## Star History
+## 📈 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=MiyukiQAQ/MissAV-Downloader&type=Date)](https://star-history.com/#MiyukiQAQ/MissAV-Downloader&Date)
