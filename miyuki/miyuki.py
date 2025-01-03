@@ -262,7 +262,7 @@ def get_movie_title(movie_html, movie_name):
         result = match.group(1)
         result = result.replace("&#039;", "'")
         if "uncensored-leak" in movie_name:
-            result += " (Uncensored)"
+            result += "[Uncensored]"
         return result
 
     return None
@@ -352,9 +352,13 @@ def download(movie_url, download_action=True, write_action=True, ffmpeg_action=F
 
     playlist = requests.get(url=playlist_url, headers=headers, verify=False).text
 
-    final_quality, resolution_url = get_final_quality_and_resolution(playlist, quality)
+    try:
+        final_quality, resolution_url = get_final_quality_and_resolution(playlist, quality)
+    except Exception as e:
+        resolution_url = find_last_non_empty_line(playlist)
+        final_quality = resolution_url.split('/')[0]
 
-    final_file_name = movie_name + '[' + final_quality + 'p]'
+    final_file_name = movie_name + '_' + final_quality
 
     resolution = resolution_url.split('/')[0]
 

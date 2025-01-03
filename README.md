@@ -26,7 +26,7 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki -h
-usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title]
+usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title] [-quality] [-retry] [-delay] [-timeout]
 
 A tool for downloading videos from the "MissAV" website.
 
@@ -45,6 +45,10 @@ Use the -cover   option to save the cover when downloading the video
 Use the -ffcover option to set the cover as the video preview (ffmpeg required)
 Use the -noban   option to turn off the miyuki banner when downloading the video
 Use the -title   option to use the full title as the movie file name
+Use the -quality option to specify the movie resolution (360, 480, 720, 1080...)
+Use the -retry   option to specify the number of retries for downloading segments
+Use the -delay   option to specify the delay before retry ( seconds )
+Use the -timeout option to specify the timeout for segment download ( seconds )
 
 options:
   -h, --help     show this help message and exit
@@ -60,6 +64,10 @@ options:
   -ffcover       Set cover as preview (ffmpeg required)
   -noban         Do not display the banner
   -title         Full title as file name
+  -quality       Specify the movie resolution
+  -retry         Number of retries for downloading segments
+  -delay         Delay in seconds before retry
+  -timeout       Timeout in seconds for segment download
 
 Examples:
   miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
