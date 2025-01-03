@@ -8,4 +8,4 @@ if __name__ == '__main__':
     os.environ["http_proxy"] = f"http://{proxy}"
     os.environ["https_proxy"] = f"http://{proxy}"
 
-    miyuki.miyuki.download(movie_url="https://missav.com/en/skmj-551")
+    miyuki.miyuki.download(movie_url="https://missav.com/en/skmj-551", quality="700", download_action=True, ffmpeg_action=True, retry=10, delay=20, timeout=30)
