@@ -261,8 +261,10 @@ def get_movie_title(movie_html, movie_name):
     if match:
         result = match.group(1)
         result = result.replace("&#039;", "'")
-        if "uncensored-leak" in movie_name:
-            result += "[Uncensored]"
+        # if "uncensored-leak" in movie_name:
+        #     result += "[Uncensored]"
+        result = result.replace('/', '_')
+        result = result.replace('\\', '_')
         return result
 
     return None
@@ -312,26 +314,31 @@ def find_closest(arr, target):
 
 
 def get_final_quality_and_resolution(playlist, quality : str):
-    matches = re.findall(pattern=RESOLUTION_PATTERN, string=playlist)
-    quality_map = {}
-    quality_list = []
-    m3u8_suffix = '/video.m3u8'
-    for match in matches:
-        quality_map[match[1]] = match[0]
-        quality_list.append(match[1])
+    try:
+        matches = re.findall(pattern=RESOLUTION_PATTERN, string=playlist)
+        quality_map = {}
+        quality_list = []
+        m3u8_suffix = '/video.m3u8'
+        for match in matches:
+            quality_map[match[1]] = match[0]
+            quality_list.append(match[1])
 
-    if quality is None:
-        return quality_list[-1] + 'p', find_last_non_empty_line(playlist)
-    else:
-        closest_resolution = find_closest(list(map(int, quality_list)), int(quality))
-        url_type_x = quality_map[closest_resolution] + 'x' + closest_resolution + m3u8_suffix
-        url_type_p = closest_resolution + 'p' + m3u8_suffix
-        if url_type_x in playlist:
-            return closest_resolution + 'p', url_type_x
-        elif url_type_p in playlist:
-            return closest_resolution + 'p', url_type_p
-        else:
+        if quality is None:
             return quality_list[-1] + 'p', find_last_non_empty_line(playlist)
+        else:
+            closest_resolution = find_closest(list(map(int, quality_list)), int(quality))
+            url_type_x = quality_map[closest_resolution] + 'x' + closest_resolution + m3u8_suffix
+            url_type_p = closest_resolution + 'p' + m3u8_suffix
+            if url_type_x in playlist:
+                return closest_resolution + 'p', url_type_x
+            elif url_type_p in playlist:
+                return closest_resolution + 'p', url_type_p
+            else:
+                return quality_list[-1] + 'p', find_last_non_empty_line(playlist)
+    except Exception as e:
+        resolution_url = find_last_non_empty_line(playlist)
+        final_quality = resolution_url.split('/')[0]
+        return final_quality, resolution_url
 
 
 
@@ -352,11 +359,7 @@ def download(movie_url, download_action=True, write_action=True, ffmpeg_action=F
 
     playlist = requests.get(url=playlist_url, headers=headers, verify=False).text
 
-    try:
-        final_quality, resolution_url = get_final_quality_and_resolution(playlist, quality)
-    except Exception as e:
-        resolution_url = find_last_non_empty_line(playlist)
-        final_quality = resolution_url.split('/')[0]
+    final_quality, resolution_url = get_final_quality_and_resolution(playlist, quality)
 
     final_file_name = movie_name + '_' + final_quality
 
