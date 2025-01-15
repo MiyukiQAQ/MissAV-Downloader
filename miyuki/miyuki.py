@@ -274,7 +274,7 @@ def write_error_to_text_file(url, e):
         file.write(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} - URL: {url} - Error: {e}\n")
 
 def login_get_cookie(missav_user_info):
-    response = requests.post(url='https://missav.com/api/login', data=missav_user_info, headers=headers, verify=False)
+    response = requests.post(url='https://missav.ai/api/login', data=missav_user_info, headers=headers, verify=False)
     if response.status_code == 200:
         cookie_info = response.cookies.get_dict()
         if "user_uuid" in cookie_info:
@@ -555,14 +555,14 @@ def get_public_playlist(playlist_url, limit):
 
 def get_movie_collections(cookie):
     movie_url_list = []
-    url = 'https://missav.com/saved'
+    url = 'https://missav.ai/saved'
     loop_fill_movie_urls_by_page(playlist_url=url, movie_url_list=movie_url_list, limit=None, cookie=cookie)
     logging.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
 
 def get_movie_url_by_search(key):
-    search_url = "https://missav.com/search/" + key
+    search_url = "https://missav.ai/search/" + key
     search_regex = r'<a href="([^"]+)" alt="' + key + '" >'
     html_source = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches = re.findall(pattern=search_regex, string=html_source)
@@ -682,12 +682,12 @@ def main():
 
 
         epilog='Examples:\n'
-               '  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
-               '  miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg\n'
-               '  miyuki -plist "https://missav.com/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover\n'
-               '  miyuki -plist "https://missav.com/playlists/ewzoukev" -ffmpeg -proxy localhost:7890\n'
-               '  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917\n'
-               '  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890\n'
+               '  miyuki -plist "https://missav.ai/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
+               '  miyuki -plist "https://missav.ai/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg\n'
+               '  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover\n'
+               '  miyuki -plist "https://missav.ai/playlists/ewzoukev" -ffmpeg -proxy localhost:7890\n'
+               '  miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917\n'
+               '  miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890\n'
                '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
                '  miyuki -file /home/miyuki/url.txt -ffmpeg\n'
                '  miyuki -search sw-950 -ffcover\n',

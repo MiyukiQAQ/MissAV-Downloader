@@ -70,12 +70,12 @@ options:
   -timeout       Timeout in seconds for segment download
 
 Examples:
-  miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
-  miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg
-  miyuki -plist "https://missav.com/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover
-  miyuki -plist "https://missav.com/playlists/ewzoukev" -ffmpeg -proxy localhost:7890
-  miyuki -urls https://missav.com/sw-950 https://missav.com/dandy-917
-  miyuki -urls https://missav.com/sw-950 -proxy localhost:7890
+  miyuki -plist "https://missav.ai/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
+  miyuki -plist "https://missav.ai/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg
+  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover
+  miyuki -plist "https://missav.ai/playlists/ewzoukev" -ffmpeg -proxy localhost:7890
+  miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917
+  miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890
   miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
   miyuki -file /home/miyuki/url.txt -ffmpeg
   miyuki -search sw-950 -ffcover
@@ -88,13 +88,13 @@ Examples:
 - **You should wrap the playlist URL with " " when you use the -plist option.**
 
 Command Examples:
-- ```miyuki -plist "https://missav.com/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg```
-- ```miyuki -plist "https://missav.com/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg```
-- ```miyuki -plist "https://missav.com/dm132/actresses/JULIA" -limit 20 -ffmpeg```
-- ```miyuki -plist "https://missav.com/playlists/ewzoukev" -limit 20 -ffmpeg```
-- ```miyuki -plist "https://missav.com/dm444/en/labels/WANZ" -limit 20 -ffmpeg```
-- ```miyuki -plist "https://missav.com/dm21/en/makers/Takara%20Visual" -limit 20 -ffmpeg```
-- ```miyuki -plist "https://missav.com/dm1/en/genres/4K" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/playlists/ewzoukev" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/dm444/en/labels/WANZ" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/dm21/en/makers/Takara%20Visual" -limit 20 -ffmpeg```
+- ```miyuki -plist "https://missav.ai/dm1/en/genres/4K" -limit 20 -ffmpeg```
 
 ## 💡 Precautions
 
