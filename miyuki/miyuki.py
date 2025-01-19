@@ -20,6 +20,7 @@ ERROR_RECORD_FILE = 'error_records_miyuki.txt'
 TMP_HTML_FILE = 'tmp_movie_miyuki.html'
 downloaded_urls = set()
 movie_save_path_root = 'movies_folder_miyuki'
+COVER_URL_PREFIX = 'https://fourhoi.com/'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
@@ -391,7 +392,7 @@ def download(movie_url, download_action=True, write_action=True, ffmpeg_action=F
 
     if cover_action:
         try:
-            cover_pic_url = f"https://fivetiu.com/{movie_name}/cover-n.jpg"
+            cover_pic_url = f"{COVER_URL_PREFIX}{movie_name}/cover-n.jpg"
             cover_pic = requests.get(url=cover_pic_url, headers=headers, verify=False).content
             with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
                 file.write(cover_pic)
