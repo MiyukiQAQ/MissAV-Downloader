@@ -651,6 +651,7 @@ def execute_download(args):
             logging.info("Processing URL: " + url)
             download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover, quality=quality, retry=retry, delay=delay, timeout=timeout)
             logging.info("Processing URL Complete: " + url)
+            print()
         except Exception as e:
             logging.error(f"Failed to download the movie: {url}, error: {e}")
             write_error_to_text_file(url, e)
