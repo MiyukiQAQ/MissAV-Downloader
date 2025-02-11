@@ -9,14 +9,25 @@ import time
 import sys
 from curl_cffi import requests
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='Miyuki - %(asctime)s - %(levelname)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger('miyuki-logger')
+logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler('miyuki.log')
+file_handler.setLevel(logging.DEBUG)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('Miyuki - %(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 magic_number = 114514
 RECORD_FILE = 'downloaded_urls_miyuki.txt'
 FFMPEG_INPUT_FILE = 'ffmpeg_input_miyuki.txt'
-ERROR_RECORD_FILE = 'error_records_miyuki.txt'
 TMP_HTML_FILE = 'tmp_movie_miyuki.html'
 downloaded_urls = set()
 movie_save_path_root = 'movies_folder_miyuki'
@@ -100,10 +111,10 @@ def https_request_with_retry(request_url, retry, delay, timeout):
             response = requests.get(url=request_url, headers=headers, timeout=inner_timeout, verify=False).content
             return response
         except Exception as e:
-            # logging.error(f"Failed to fetch data (attempt {retries + 1}/{max_retries}): {e} url is: {request_url}")
+            # logger.error(f"Failed to fetch data (attempt {retries + 1}/{max_retries}): {e} url is: {request_url}")
             retries += 1
             time.sleep(inner_delay)
-    # logging.error(f"Max retries reached. Failed to fetch data. url is: {request_url}")
+    # logger.error(f"Max retries reached. Failed to fetch data. url is: {request_url}")
     return None
 
 
@@ -137,9 +148,9 @@ def video_write_jpegs_to_mp4(movie_name, video_offset_max, final_file_name):
                 print('exception: ' + str(e))
                 continue
 
-    logging.info('Save Completed: ' + output_file_name)
-    logging.info(f'Total number of files: {video_offset_max + 1} , number of files saved: {saved_count}')
-    logging.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
+    logger.info('Save Completed: ' + output_file_name)
+    logger.info(f'Total number of files: {video_offset_max + 1} , number of files saved: {saved_count}')
+    logger.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
 def generate_mp4_by_ffmpeg(movie_name, final_file_name, cover_as_preview):
@@ -175,11 +186,11 @@ def generate_mp4_by_ffmpeg(movie_name, final_file_name, cover_as_preview):
 
 
     try:
-        logging.info("FFmpeg executing...")
+        logger.info("FFmpeg executing...")
         subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL)
-        logging.info("FFmpeg execution completed.")
+        logger.info("FFmpeg execution completed.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"Movie name: {movie_name}, FFmpeg execution failed: {e}")
+        logger.error(f"Movie name: {movie_name}, FFmpeg execution failed: {e}")
         raise e
 
 def generate_input_txt(movie_name, video_offset_max):
@@ -196,7 +207,7 @@ def generate_input_txt(movie_name, video_offset_max):
     total_files = video_offset_max + 1
     downloaded_files = find_count
     completion_rate = '{:.2%}'.format(downloaded_files / (total_files))
-    logging.info(f'Total files : {total_files} , downloaded files : {downloaded_files} , completion rate : {completion_rate}')
+    logger.info(f'Total files : {total_files} , downloaded files : {downloaded_files} , completion rate : {completion_rate}')
 
 
 def video_write_jpegs_to_mp4_by_ffmpeg(movie_name, video_offset_max, cover_as_preview, final_file_name):
@@ -250,10 +261,10 @@ def get_movie_uuid(url):
         result = match.group(1)
         resule_str_list = result.split("|")
         uuid = "-".join(resule_str_list[::-1])
-        logging.info("Matching uuid successfully: " + uuid)
+        logger.info("Matching uuid successfully: " + uuid)
         return uuid, html
     else:
-        logging.error("Failed to match uuid.")
+        logger.error("Failed to match uuid.")
 
 def get_movie_title(movie_html, movie_name):
 
@@ -270,19 +281,15 @@ def get_movie_title(movie_html, movie_name):
 
     return None
 
-def write_error_to_text_file(url, e):
-    with open(ERROR_RECORD_FILE, "a", encoding="UTF-8") as file:
-        file.write(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} - URL: {url} - Error: {e}\n")
-
 def login_get_cookie(missav_user_info):
     response = requests.post(url='https://missav.ai/api/login', data=missav_user_info, headers=headers, verify=False)
     if response.status_code == 200:
         cookie_info = response.cookies.get_dict()
         if "user_uuid" in cookie_info:
-            logging.info("User uuid: " + cookie_info["user_uuid"])
+            logger.info("User uuid: " + cookie_info["user_uuid"])
             return cookie_info
 
-    logging.error("Login failed, check your network connection or account information.")
+    logger.error("Login failed, check your network connection or account information.")
     exit(magic_number)
 
 def find_last_non_empty_line(text):
@@ -349,7 +356,7 @@ def download(movie_url, download_action=True, write_action=True, ffmpeg_action=F
     movie_name = movie_url.split('/')[-1]
 
     if already_downloaded(movie_url):
-        logging.info(movie_name + " already exists, skip downloading.")
+        logger.info(movie_name + " already exists, skip downloading.")
         return
 
     movie_uuid, movie_html = get_movie_uuid(movie_url)
@@ -397,7 +404,7 @@ def download(movie_url, download_action=True, write_action=True, ffmpeg_action=F
             with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
                 file.write(cover_pic)
         except Exception as e:
-            logging.error(f"Movie name : {movie_name}, failed to download the cover: {e}")
+            logger.error(f"Movie name : {movie_name}, failed to download the cover: {e}")
 
     if download_action:
         counter.reset()
@@ -436,7 +443,7 @@ def check_ffmpeg_command(ffmpeg):
         try:
             subprocess.run(['ffmpeg', '-version'], check=True, stdout=subprocess.DEVNULL)
             return True
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             return False
     else:
         return True
@@ -490,44 +497,44 @@ def validate_args(args):
     timeout = args.timeout
 
     if not check_ffmpeg_command(ffmpeg):
-        logging.error("FFmpeg command status error.")
+        logger.error("FFmpeg command status error.")
         exit(magic_number)
 
     if not check_ffmpeg_command(ffcover):
-        logging.error("FFmpeg command status error.")
+        logger.error("FFmpeg command status error.")
         exit(magic_number)
 
     if not check_single_non_none(urls, auth, plist, search, file):
-        logging.error("Among -urls, -auth, -search, -plist, and -file, exactly one option must be specified.")
+        logger.error("Among -urls, -auth, -search, -plist, and -file, exactly one option must be specified.")
         exit(magic_number)
 
     if not check_auth(auth):
-        logging.error("The username and password entered are not in the correct format.")
-        logging.error("Correct example: foo@gmail.com password")
+        logger.error("The username and password entered are not in the correct format.")
+        logger.error("Correct example: foo@gmail.com password")
         exit(magic_number)
 
     if not check_positive_integer(limit):
-        logging.error("The -limit option accepts only positive integers.")
+        logger.error("The -limit option accepts only positive integers.")
         exit(magic_number)
 
     if not check_file(file):
-        logging.error("The -file option accepts only a valid file path.")
+        logger.error("The -file option accepts only a valid file path.")
         exit(magic_number)
 
     if not check_positive_integer(quality):
-        logging.error("The -quality option accepts only positive integers.")
+        logger.error("The -quality option accepts only positive integers.")
         exit(magic_number)
 
     if not check_positive_integer(retry):
-        logging.error("The -retry option accepts only positive integers.")
+        logger.error("The -retry option accepts only positive integers.")
         exit(magic_number)
 
     if not check_positive_integer(delay):
-        logging.error("The -delay option accepts only positive integers.")
+        logger.error("The -delay option accepts only positive integers.")
         exit(magic_number)
 
     if not check_positive_integer(timeout):
-        logging.error("The -timeout option accepts only positive integers.")
+        logger.error("The -timeout option accepts only positive integers.")
         exit(magic_number)
 
 def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit, cookie):
@@ -537,7 +544,7 @@ def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit, cookie):
         temp_url_list = list(set(movie_url_matches))
         for movie_url in temp_url_list:
             movie_url_list.append(movie_url)
-            logging.info(f"Movie {len(movie_url_list)} url: {movie_url}")
+            logger.info(f"Movie {len(movie_url_list)} url: {movie_url}")
             if limit is not None and len(movie_url_list) >= int(limit):
                 return
         next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
@@ -548,9 +555,9 @@ def loop_fill_movie_urls_by_page(playlist_url, movie_url_list, limit, cookie):
 
 def get_public_playlist(playlist_url, limit):
     movie_url_list = []
-    logging.info("Getting the URLs of all movies.")
+    logger.info("Getting the URLs of all movies.")
     loop_fill_movie_urls_by_page(playlist_url=playlist_url, movie_url_list=movie_url_list, limit=limit, cookie=None)
-    logging.info("All the video URLs have been successfully obtained.")
+    logger.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
 
@@ -558,7 +565,7 @@ def get_movie_collections(cookie):
     movie_url_list = []
     url = 'https://missav.ai/saved'
     loop_fill_movie_urls_by_page(playlist_url=url, movie_url_list=movie_url_list, limit=None, cookie=cookie)
-    logging.info("All the video URLs have been successfully obtained.")
+    logger.info("All the video URLs have been successfully obtained.")
     return movie_url_list
 
 
@@ -601,7 +608,7 @@ def execute_download(args):
         cover = True
 
     if proxy is not None:
-        logging.info("Network proxy enabled.")
+        logger.info("Network proxy enabled.")
         os.environ["http_proxy"] = f"http://{proxy}"
         os.environ["https_proxy"] = f"http://{proxy}"
 
@@ -615,46 +622,45 @@ def execute_download(args):
         password = auth[1]
         cookie = login_get_cookie({'email': username, 'password': password})
         movie_urls = get_movie_collections(cookie)
-        logging.info("The URLs of all the videos you have favorited (total: " + str(len(movie_urls)) + " movies): ")
+        logger.info("The URLs of all the videos you have favorited (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
-            logging.info(url)
+            logger.info(url)
 
     if plist is not None:
         movie_urls = get_public_playlist(plist, limit)
-        logging.info("The URLs of all videos in this playlist (total: " + str(len(movie_urls)) + " movies): ")
+        logger.info("The URLs of all videos in this playlist (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
-            logging.info(url)
+            logger.info(url)
 
     if search is not None:
         url = get_movie_url_by_search(search)
         if url is not None:
-            logging.info("Search " + search + " successfully: " + url)
+            logger.info("Search " + search + " successfully: " + url)
             movie_urls.append(url)
         else:
-            logging.error("Search failed, key: " + search)
+            logger.error("Search failed, key: " + search)
             exit(magic_number)
 
     if file is not None:
         movie_urls = get_urls_from_file(file)
-        logging.info("The URLs of all videos in the file (total: " + str(len(movie_urls)) + " movies): ")
+        logger.info("The URLs of all videos in the file (total: " + str(len(movie_urls)) + " movies): ")
         for url in movie_urls:
-            logging.info(url)
+            logger.info(url)
 
 
     if (len(movie_urls) == 0):
-        logging.error("No urls found.")
+        logger.error("No urls found.")
         exit(magic_number)
 
     for url in movie_urls:
         delete_all_subfolders(movie_save_path_root)
         try:
-            logging.info("Processing URL: " + url)
+            logger.info("Processing URL: " + url)
             download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover, quality=quality, retry=retry, delay=delay, timeout=timeout)
-            logging.info("Processing URL Complete: " + url)
+            logger.info("Processing URL Complete: " + url)
             print()
         except Exception as e:
-            logging.error(f"Failed to download the movie: {url}, error: {e}")
-            write_error_to_text_file(url, e)
+            logger.error(f"Failed to download the movie: {url}, error: {e}")
         delete_all_subfolders(movie_save_path_root)
 
 
@@ -715,6 +721,8 @@ def main():
 
 
     args = parser.parse_args()
+
+    logger.info(args)
 
     validate_args(args)
 
