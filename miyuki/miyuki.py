@@ -7,7 +7,7 @@ import shutil
 import threading
 import time
 import sys
-from typing import Union
+from typing import Optional
 from curl_cffi import requests
 
 logger = logging.getLogger('miyuki-logger')
@@ -64,9 +64,9 @@ banner = """
 """
 
 
-def display_progress_bar(max_value: int, counter: "ThreadSafeCounter") -> None:
+def display_progress_bar(max_value: int, file_counter: "ThreadSafeCounter") -> None:
     bar_length = 50
-    current_value = counter.incrementAndGet()
+    current_value = file_counter.increment_and_get()
     progress = current_value / max_value
     block = int(round(bar_length * progress))
     text = f"\rProgress: [{'#' * block + '-' * (bar_length - block)}] {current_value}/{max_value}"
@@ -79,7 +79,7 @@ class ThreadSafeCounter:
         self._count = 0
         self._lock = threading.Lock()
 
-    def incrementAndGet(self) -> int:
+    def increment_and_get(self) -> int:
         with self._lock:
             self._count += 1
             return self._count
@@ -96,7 +96,7 @@ class ThreadSafeCounter:
 counter = ThreadSafeCounter()
 
 
-def https_request_with_retry(request_url: str, retry: str, delay: str, timeout: str) -> None:
+def https_request_with_retry(request_url: str, retry: str, delay: str, timeout: str) -> Optional[bytes]:
     inner_retry = RETRY
     inner_delay = DELAY
     inner_timeout = TIMEOUT
@@ -196,7 +196,6 @@ def generate_mp4_by_ffmpeg(movie_name: str, final_file_name: str, cover_as_previ
         raise e
 
 def generate_input_txt(movie_name: str, video_offset_max: int) -> None:
-    output_file_name = movie_save_path_root + '/' + movie_name + '.mp4'
     find_count = 0
     with open(FFMPEG_INPUT_FILE, 'w') as input_txt:
         for i in range(video_offset_max + 1):
@@ -208,7 +207,7 @@ def generate_input_txt(movie_name: str, video_offset_max: int) -> None:
     print()
     total_files = video_offset_max + 1
     downloaded_files = find_count
-    completion_rate = '{:.2%}'.format(downloaded_files / (total_files))
+    completion_rate = '{:.2%}'.format(downloaded_files / total_files)
     logger.info(f'Total files : {total_files} , downloaded files : {downloaded_files} , completion rate : {completion_rate}')
 
 
@@ -251,7 +250,7 @@ def create_root_folder_if_not_exists(folder_name: str) -> None:
         os.makedirs(path)
 
 
-def get_movie_uuid(url: str) -> Union[tuple[str,str], None]:
+def get_movie_uuid(url: str) -> Optional[tuple[str,str], None]:
     html: str = requests.get(url=url, headers=headers, verify=False).text
 
     with open(TMP_HTML_FILE, "w", encoding="UTF-8") as file:
@@ -271,7 +270,7 @@ def get_movie_uuid(url: str) -> Union[tuple[str,str], None]:
    
         
 
-def get_movie_title(movie_html, movie_name) -> Union[str,None]:
+def get_movie_title(movie_html) -> Optional[str]:
 
     match = re.search(match_title_pattern, movie_html)
 
@@ -280,8 +279,6 @@ def get_movie_title(movie_html, movie_name) -> Union[str,None]:
     
     result: str = match.group(1)
     result = result.replace("&#039;", "'")
-    # if "uncensored-leak" in movie_name:
-    #     result += "[Uncensored]"
     result = result.replace('/', '_')
     result = result.replace('\\', '_')
     return result
@@ -326,7 +323,7 @@ def find_closest(arr: list[int], target: int) -> str:
     return str(closest_value)
 
 
-def get_final_quality_and_resolution(playlist: str, quality : Union[str,None]) -> tuple[str, str]:
+def get_final_quality_and_resolution(playlist: str, quality : Optional[str]) -> tuple[str, str]:
     try:
         matches = re.findall(pattern=RESOLUTION_PATTERN, string=playlist)
         quality_map = {}
@@ -355,7 +352,7 @@ def get_final_quality_and_resolution(playlist: str, quality : Union[str,None]) -
 
 
 def download(movie_url: str, download_action: bool=True, write_action: bool=True, ffmpeg_action: bool=False,
-             num_threads=os.cpu_count(), cover_action: bool=True, title_action: bool=False, cover_as_preview: bool=False, quality: Union[str,None]=None , retry=None, delay=None, timeout=None):
+             num_threads=os.cpu_count(), cover_action: bool=True, title_action: bool=False, cover_as_preview: bool=False, quality: Optional[str]=None , retry=None, delay=None, timeout=None):
 
     movie_name = movie_url.split('/')[-1]
 
@@ -399,7 +396,7 @@ def download(movie_url: str, download_action: bool=True, write_action: bool=True
 
     intervals = split_integer_into_intervals(video_offset_max + 1, num_threads)
 
-    movie_title = get_movie_title(movie_html, movie_name)
+    movie_title = get_movie_title(movie_html)
 
     if cover_action:
         try:
@@ -461,7 +458,7 @@ def check_auth(auth: list[str]) -> bool:
  
     return True
 
-def check_file(file_path: Union[str,None]) -> bool:
+def check_file(file_path: Optional[str]) -> bool:
     if file_path is None:
         return True
 
@@ -476,7 +473,7 @@ def check_file(file_path: Union[str,None]) -> bool:
 
     return os.path.getsize(file_path) > 0
 
-def check_positive_integer(limit: Union[str,None]) -> bool:
+def check_positive_integer(limit: Optional[str]) -> bool:
     if limit is None:
         return True
 
@@ -540,7 +537,7 @@ def validate_args(args) -> None:
         logger.error("The -timeout option accepts only positive integers.")
         exit(magic_number)
 
-def loop_fill_movie_urls_by_page(playlist_url: str, movie_url_list: list[str], limit: Union[str, None], cookie: Union[dict, None]) -> None:
+def loop_fill_movie_urls_by_page(playlist_url: str, movie_url_list: list[str], limit: Optional[str], cookie: Optional[dict]) -> None:
     while playlist_url:
         html_source: str = requests.get(url=playlist_url, headers=headers, verify=False, cookies=cookie).text
         movie_url_matches: list[str] = re.findall(pattern=href_regex_public_playlist, string=html_source)
@@ -551,7 +548,7 @@ def loop_fill_movie_urls_by_page(playlist_url: str, movie_url_list: list[str], l
             if limit is not None and len(movie_url_list) >= int(limit):
                 return
         next_page_matches = re.findall(pattern=href_regex_next_page, string=html_source)
-        if not len(next_page_matches) == 1:
+        if not next_page_matches:
             break
         playlist_url = next_page_matches[0].replace('&amp;', '&')
 
@@ -571,13 +568,13 @@ def get_movie_collections(cookie: dict) -> list[str]:
     return movie_url_list
 
 
-def get_movie_url_by_search(key) -> Union[str, None]:
+def get_movie_url_by_search(key) -> Optional[str]:
     search_url = "https://missav.ai/search/" + key
     search_regex = r'<a href="([^"]+)" alt="' + key + '" >'
     html_source: str = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches: list[str] = re.findall(pattern=search_regex, string=html_source)
     temp_url_list = list(set(movie_url_matches))
-    if (len(temp_url_list) != 0):
+    if len(temp_url_list) != 0:
         return temp_url_list[0]
 
 def get_urls_from_file(file: str) -> list[str]:
@@ -648,7 +645,7 @@ def execute_download(args) -> None:
             logger.info(url)
 
 
-    if (len(movie_urls) == 0):
+    if len(movie_urls) == 0:
         logger.error("No urls found.")
         exit(magic_number)
 
