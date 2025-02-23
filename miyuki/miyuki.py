@@ -616,6 +616,12 @@ def execute_download(args) -> None:
     movie_urls = []
     playlists_urls: list[str] = []
 
+    if file is not None:
+        urls = get_urls_from_file(file)
+        logger.info("URLs found in the file (total: " + str(len(urls)) +" ): ")
+        for url in urls:
+            logger.info(url)
+
     if urls is not None:
         playlists_urls = [url for url in urls if is_playlist(url)]
         movie_urls = [url for url in urls if not is_playlist(url)]
@@ -648,12 +654,6 @@ def execute_download(args) -> None:
         else:
             logger.error("Search failed, key: " + search)
             exit(magic_number)
-
-    if file is not None:
-        movie_urls = get_urls_from_file(file)
-        logger.info("The URLs of all videos in the file (total: " + str(len(movie_urls)) + " movies): ")
-        for url in movie_urls:
-            logger.info(url)
 
 
     if (len(movie_urls) == 0):
