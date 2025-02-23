@@ -35,6 +35,7 @@ movie_save_path_root = 'movies_folder_miyuki'
 COVER_URL_PREFIX = 'https://fourhoi.com/'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
+PLAYLIST_URL_PARTS = "/search/","/actresses/","/playlists/", "/actors/" ,"/makers/", "/directors/", "/labels/"
 href_regex_movie_collection = r'<a class="text-secondary group-hover:text-primary" href="([^"]+)" alt="'
 href_regex_public_playlist = r'<a href="([^"]+)" alt="'
 href_regex_next_page = r'<a href="([^"]+)" rel="next"'
@@ -612,10 +613,12 @@ def execute_download(args) -> None:
         os.environ["http_proxy"] = f"http://{proxy}"
         os.environ["https_proxy"] = f"http://{proxy}"
 
-    movie_urls: list[str] = []
+    movie_urls = []
+    playlists_urls: list[str] = []
 
     if urls is not None:
         movie_urls = urls
+        playlists_urls = [url for url in urls if is_playlist(url)]
 
     if auth is not None:
         username = auth[0]
@@ -627,10 +630,14 @@ def execute_download(args) -> None:
             logger.info(url)
 
     if plist is not None:
-        movie_urls = get_public_playlist(plist, limit)
-        logger.info("The URLs of all videos in this playlist (total: " + str(len(movie_urls)) + " movies): ")
-        for url in movie_urls:
-            logger.info(url)
+        playlists_urls.append(plist)
+
+    if playlists_urls:
+        for plist_url in playlists_urls:
+            movie_urls = get_public_playlist(plist_url, limit)
+            logger.info(f"The URLs of all videos in playlist {plist_url} (total: {len(movie_urls)} movies): ")
+            for url in movie_urls:
+                logger.info(url)
 
     if search is not None:
         url = get_movie_url_by_search(search)
@@ -663,6 +670,11 @@ def execute_download(args) -> None:
             logger.error(f"Failed to download the movie: {url}, error: {e}")
         delete_all_subfolders(movie_save_path_root)
 
+
+
+def is_playlist(url:str) -> bool:
+    return any(p in url for p in PLAYLIST_URL_PARTS)
+    
 
 def main() -> None:
     parser = argparse.ArgumentParser(
