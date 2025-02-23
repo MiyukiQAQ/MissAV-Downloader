@@ -9,7 +9,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'miyuki=miyuki.miyuki:main',
+            'miyuki=main:main',
         ],
     },
     author='MiyukiQAQ',
