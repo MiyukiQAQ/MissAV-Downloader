@@ -1,0 +1,6 @@
+*.egg*
+*.log
+*.html
+__pycache__
+*.jpeg
+*.mp4
