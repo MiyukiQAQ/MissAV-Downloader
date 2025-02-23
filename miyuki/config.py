@@ -11,6 +11,7 @@ HREF_REGEX_NEXT_PAGE = r'<a href="([^"]+)" rel="next"'
 MATCH_UUID_PATTERN = r'm3u8\|([a-f0-9\|]+)\|com\|surrit\|https\|video'
 MATCH_TITLE_PATTERN = r'<title>([^"]+)</title>'
 RESOLUTION_PATTERN = r'RESOLUTION=(\d+)x(\d+)'
+MAGIC_NUMBER = 114514
 RETRY = 5
 DELAY = 2
 TIMEOUT = 10

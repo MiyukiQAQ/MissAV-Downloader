@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 from miyuki.logger import logger
-from miyuki.config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE
+from miyuki.config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE, MAGIC_NUMBER
 from miyuki.http_client import HttpClient
 from miyuki.url_sources import SingleUrlSource, PlaylistSource, AuthSource, SearchSource, FileSource
 from miyuki.video_downloader import VideoDownloader
@@ -51,21 +51,21 @@ def validate_args(args):
     params = [args.urls, args.auth, args.plist, args.search, args.file]
     if sum(param is not None for param in params) != 1:
         logger.error("Exactly one of -urls, -auth, -plist, -search, -file must be specified.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
     if args.auth and len(args.auth) != 2:
         logger.error("Auth requires username and password.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
     if not check_ffmpeg_command(args.ffmpeg) or not check_ffmpeg_command(args.ffcover):
         logger.error("FFmpeg command status error.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
     for opt in ['limit', 'quality', 'retry', 'delay', 'timeout']:
         value = getattr(args, opt)
         if value and (not value.isdigit() or int(value) <= 0):
             logger.error(f"The -{opt} option must be a positive integer.")
-            exit(114514)
+            exit(MAGIC_NUMBER)
     if args.file and (not os.path.isfile(args.file) or os.path.getsize(args.file) == 0):
         logger.error("The -file option must be a valid non-empty file.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -138,12 +138,12 @@ def main():
               FileSource(args.file) if args.file else None)
     if not source:
         logger.error("No source specified.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
 
     movie_urls = source.get_urls()
     if not movie_urls:
         logger.error("No URLs to download.")
-        exit(114514)
+        exit(MAGIC_NUMBER)
 
     download_tracker = DownloadTracker(RECORD_FILE)
     options = {
