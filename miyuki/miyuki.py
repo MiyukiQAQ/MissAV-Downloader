@@ -629,8 +629,8 @@ def execute_download(args) -> None:
         for url in movie_urls:
             logger.info(url)
 
-    if plist is not None:
-        playlists_urls.append(plist)
+    if plist:
+        playlists_urls.extend(plist)
 
     if playlists_urls:
         for plist_url in playlists_urls:
@@ -716,7 +716,7 @@ def main() -> None:
 
     parser.add_argument('-urls', nargs='+', required=False, metavar='',help='Movie URLs, separate multiple URLs with spaces')
     parser.add_argument('-auth', nargs='+', required=False, metavar='',help='Username and password, separate with space')
-    parser.add_argument('-plist', type=str, required=False, metavar='', help='Public playlist url')
+    parser.add_argument('-plist', nargs='+', required=False, metavar='', help='Public playlist url')
     parser.add_argument('-limit', type=str, required=False, metavar='', help='Limit the number of downloads')
     parser.add_argument('-search', type=str, required=False, metavar='', help='Movie serial number')
     parser.add_argument('-file', type=str, required=False, metavar='', help='File path')
