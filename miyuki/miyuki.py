@@ -617,8 +617,8 @@ def execute_download(args) -> None:
     playlists_urls: list[str] = []
 
     if urls is not None:
-        movie_urls = urls
         playlists_urls = [url for url in urls if is_playlist(url)]
+        movie_urls = [url for url in urls if not is_playlist(url)]
 
     if auth is not None:
         username = auth[0]
