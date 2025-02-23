@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from pathlib import Path
 import re
 import subprocess
 import shutil
@@ -121,11 +122,14 @@ def https_request_with_retry(request_url: str, retry: str, delay: str, timeout: 
 
 def thread_task(start: int, end: int, uuid: str, resolution: str, movie_name: str, video_offset_max:int, retry: str, delay: str, timeout: str) -> None:
     for i in range(start, end):
-        url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
+        filename = f'video{i}.jpeg'
+        file_path = Path(movie_save_path_root + '/' + movie_name + '/' + filename)
+        if file_path.is_file():
+            continue
+        url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + filename
         content = https_request_with_retry(url_tmp, retry, delay, timeout)
         if content is None: 
             continue
-        file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
         with open(file_path, 'wb') as file:
             file.write(content)
         display_progress_bar(video_offset_max + 1, counter)
@@ -649,7 +653,7 @@ def execute_download(args) -> None:
         logger.error("No urls found.")
         exit(magic_number)
 
-    for url in movie_urls:
+    for url in sorted(set(movie_urls)):
         delete_all_subfolders(movie_save_path_root)
         try:
             logger.info("Processing URL: " + url)
