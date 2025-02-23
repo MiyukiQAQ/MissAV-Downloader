@@ -4,7 +4,8 @@ from miyuki.config import FFMPEG_INPUT_FILE
 from miyuki.logger import logger
 
 class FFmpegProcessor:
-    def create_video_from_segments(self, segment_files: list[str], output_file: str, cover_file: Optional[str] = None) -> None:
+    @staticmethod
+    def create_video_from_segments(segment_files: list[str], output_file: str, cover_file: Optional[str] = None) -> None:
         with open(FFMPEG_INPUT_FILE, 'w') as f:
             for file in segment_files:
                 f.write(f"file '{file}'\n")

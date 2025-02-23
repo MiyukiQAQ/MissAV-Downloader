@@ -117,7 +117,7 @@ class VideoDownloader:
         if self.options.get('ffmpeg_action'):
             segment_files = [os.path.join(self.movie_folder, f"video{i}.jpeg") for i in range(video_offset_max + 1) if os.path.exists(os.path.join(self.movie_folder, f"video{i}.jpeg"))]
             cover_file = os.path.join(MOVIE_SAVE_PATH_ROOT, f"{self.movie_name}-cover.jpg") if self.options.get('cover_as_preview') and os.path.exists(os.path.join(MOVIE_SAVE_PATH_ROOT, f"{self.movie_name}-cover.jpg")) else None
-            FFmpegProcessor().create_video_from_segments(segment_files, output_file, cover_file)
+            FFmpegProcessor.create_video_from_segments(segment_files, output_file, cover_file)
         else:
             with open(output_file, 'wb') as outfile:
                 for i in range(video_offset_max + 1):
