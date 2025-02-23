@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from pathlib import Path
 import re
 import subprocess
 import shutil
@@ -31,7 +32,7 @@ RECORD_FILE = 'downloaded_urls_miyuki.txt'
 FFMPEG_INPUT_FILE = 'ffmpeg_input_miyuki.txt'
 TMP_HTML_FILE = 'tmp_movie_miyuki.html'
 downloaded_urls = set()
-movie_save_path_root = 'movies_folder_miyuki'
+movie_save_path_root = Path('movies_folder_miyuki')
 COVER_URL_PREFIX = 'https://fourhoi.com/'
 video_m3u8_prefix = 'https://surrit.com/'
 video_playlist_suffix = '/playlist.m3u8'
@@ -121,44 +122,46 @@ def https_request_with_retry(request_url: str, retry: str, delay: str, timeout: 
 
 def thread_task(start: int, end: int, uuid: str, resolution: str, movie_name: str, video_offset_max:int, retry: str, delay: str, timeout: str) -> None:
     for i in range(start, end):
-        url_tmp = 'https://surrit.com/' + uuid + '/' + resolution + '/' + 'video' + str(i) + '.jpeg'
+        file_name = f'video{i}.jpeg'
+        url_tmp = f'https://surrit.com/{uuid}/{resolution}/{file_name}'
         content = https_request_with_retry(url_tmp, retry, delay, timeout)
         if content is None: 
             continue
-        file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
+        file_path = movie_save_path_root / movie_name  / file_name
         with open(file_path, 'wb') as file:
             file.write(content)
         display_progress_bar(video_offset_max + 1, counter)
 
 
 def video_write_jpegs_to_mp4(movie_name: str, video_offset_max: int, final_file_name: str) -> None:
-    movie_file_name = final_file_name + '.mp4'
-    output_file_name = movie_save_path_root + '/' + movie_file_name
+    movie_file_name = f'{final_file_name}.mp4'
+    output_file_name = movie_save_path_root / movie_file_name
     saved_count = 0
     with open(output_file_name, 'wb') as outfile:
         for i in range(video_offset_max + 1):
-            file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
+            file_name = f'video{i}.jpeg'
+            file_path = movie_save_path_root / movie_name / file_name 
             try:
                 with open(file_path, 'rb') as infile:
                     outfile.write(infile.read())
                     saved_count = saved_count + 1
-                    print('write: ' + file_path)
+                    print(f'write: {file_path}')
             except FileNotFoundError:
-                print('file not found: ' + file_path)
+                print(f'file not found: {file_path}')
                 continue
             except Exception as e:
                 print('exception: ' + str(e))
                 continue
 
-    logger.info('Save Completed: ' + output_file_name)
+    logger.info(f'Save Completed: {output_file_name}')
     logger.info(f'Total number of files: {video_offset_max + 1} , number of files saved: {saved_count}')
     logger.info('The file integrity is {:.2%}'.format(saved_count / (video_offset_max + 1)))
 
 
 def generate_mp4_by_ffmpeg(movie_name: str, final_file_name: str, cover_as_preview: bool) -> None:
-    movie_file_name = final_file_name + '.mp4'
-    output_file_name = movie_save_path_root + '/' + movie_file_name
-    cover_file_name = movie_save_path_root + '/' + movie_name + '-cover.jpg'
+    movie_file_name = f'{final_file_name}.mp4'
+    output_file_name = movie_save_path_root  / movie_file_name
+    cover_file_name = movie_save_path_root / f'{movie_name}-cover.jpg'
     if cover_as_preview and os.path.exists(cover_file_name):
         # ffmpeg -i video.mp4 -i cover.jpg -map 1 -map 0 -c copy -disposition:0 attached_pic output.mp4
         ffmpeg_command = [
@@ -199,8 +202,9 @@ def generate_input_txt(movie_name: str, video_offset_max: int) -> None:
     find_count = 0
     with open(FFMPEG_INPUT_FILE, 'w') as input_txt:
         for i in range(video_offset_max + 1):
-            file_path = movie_save_path_root + '/' + movie_name + '/video' + str(i) + '.jpeg'
-            if os.path.exists(file_path):
+            file_name = f'video{i}.jpeg'
+            file_path = movie_save_path_root / movie_name / file_name
+            if file_path.exists():
                 find_count = find_count + 1
                 input_txt.write(f"file '{file_path}'\n")
 
@@ -245,9 +249,8 @@ def split_integer_into_intervals(integer: int, n: int) -> list[tuple[int,int]]:
 
 
 def create_root_folder_if_not_exists(folder_name: str) -> None:
-    path = movie_save_path_root + '/' + folder_name
-    if not os.path.exists(path):
-        os.makedirs(path)
+    path = movie_save_path_root / folder_name
+    path.mkdir(exist_ok=True, parents=True)
 
 
 def get_movie_uuid(url: str) -> Optional[tuple[str,str], None]:
@@ -357,7 +360,7 @@ def download(movie_url: str, download_action: bool=True, write_action: bool=True
     movie_name = movie_url.split('/')[-1]
 
     if already_downloaded(movie_url):
-        logger.info(movie_name + " already exists, skip downloading.")
+        logger.info(f'{movie_name} already exists, skip downloading.')
         return
 
     movie_uuid, movie_html = get_movie_uuid(movie_url)
@@ -402,7 +405,7 @@ def download(movie_url: str, download_action: bool=True, write_action: bool=True
         try:
             cover_pic_url: str = f"{COVER_URL_PREFIX}{movie_name}/cover-n.jpg"
             cover_pic: bytes = requests.get(url=cover_pic_url, headers=headers, verify=False).content
-            with open(movie_save_path_root + '/' + movie_name + '-cover.jpg', 'wb') as file:
+            with open(movie_save_path_root / f'{movie_name}-cover.jpg', 'wb') as file:
                 file.write(cover_pic)
         except Exception as e:
             logger.error(f"Movie name : {movie_name}, failed to download the cover: {e}")
@@ -422,16 +425,17 @@ def download(movie_url: str, download_action: bool=True, write_action: bool=True
         file.write(movie_url + '\n')
 
     if movie_title is not None and title_action:
-        os.rename(f"{movie_save_path_root}/{final_file_name}.mp4", f"{movie_save_path_root}/{movie_title}.mp4")
+        temp_path = movie_save_path_root / f'{final_file_name}.mp4'
+        final_path = movie_save_path_root / f'{movie_title}.mp4'
+        temp_path.rename(final_path)
 
 
-def delete_all_subfolders(folder_path: str) -> None:
-    if not os.path.exists(folder_path):
+def delete_all_subfolders(folder_path: Path) -> None:
+    if not folder_path.exists():
         return
-    for item in os.listdir(folder_path):
-        item_path = os.path.join(folder_path, item)
-        if os.path.isdir(item_path):
-            shutil.rmtree(item_path)
+    for item in folder_path.iterdir():
+        if item.is_dir():
+            shutil.rmtree(item)
 
 
 def check_single_non_none(*params) -> bool:
@@ -483,6 +487,7 @@ def check_positive_integer(limit: Optional[str]) -> bool:
     return False
 
 def validate_args(args) -> None:
+    global movie_save_path_root
     urls: list[str] = args.urls
     auth: list[str]= args.auth
     plist: str = args.plist
@@ -495,6 +500,14 @@ def validate_args(args) -> None:
     retry: str = args.retry
     delay: str = args.delay
     timeout: str = args.timeout
+    output: Union[Path,None] = args.output
+
+
+    if output and not output.is_dir():
+        logger.error(f"Output folder '{output}' does not exists")
+        exit(magic_number)
+
+    movie_save_path_root = output or movie_save_path_root
 
     if not check_ffmpeg_command(ffmpeg):
         logger.error("FFmpeg command status error.")
@@ -568,8 +581,8 @@ def get_movie_collections(cookie: dict) -> list[str]:
     return movie_url_list
 
 
-def get_movie_url_by_search(key) -> Optional[str]:
-    search_url = "https://missav.ai/search/" + key
+def get_movie_url_by_search(key : str) -> Optional[str]:
+    search_url = f'https://missav.ai/search/{key}'
     search_regex = r'<a href="([^"]+)" alt="' + key + '" >'
     html_source: str = requests.get(url=search_url, headers=headers, verify=False).text
     movie_url_matches: list[str] = re.findall(pattern=search_regex, string=html_source)
@@ -652,9 +665,9 @@ def execute_download(args) -> None:
     for url in movie_urls:
         delete_all_subfolders(movie_save_path_root)
         try:
-            logger.info("Processing URL: " + url)
+            logger.info(f'Processing URL: {url}')
             download(url, ffmpeg_action=ffmpeg, cover_action=cover, title_action=title, cover_as_preview=ffcover, quality=quality, retry=retry, delay=delay, timeout=timeout)
-            logger.info("Processing URL Complete: " + url)
+            logger.info(f'Processing URL complete: {url}')
             print()
         except Exception as e:
             logger.error(f"Failed to download the movie: {url}, error: {e}")
@@ -715,6 +728,7 @@ def main() -> None:
     parser.add_argument('-retry', type=str, required=False, metavar='', help='Number of retries for downloading segments')
     parser.add_argument('-delay', type=str, required=False, metavar='', help='Delay in seconds before retry')
     parser.add_argument('-timeout', type=str, required=False, metavar='', help='Timeout in seconds for segment download')
+    parser.add_argument('-output', type=Path, required=False, metavar='', help='Output folder to save downloaded files', default=None)
 
 
     args = parser.parse_args()
