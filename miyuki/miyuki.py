@@ -634,9 +634,10 @@ def execute_download(args) -> None:
 
     if playlists_urls:
         for plist_url in playlists_urls:
-            movie_urls = get_public_playlist(plist_url, limit)
-            logger.info(f"The URLs of all videos in playlist {plist_url} (total: {len(movie_urls)} movies): ")
-            for url in movie_urls:
+            new_urls = get_public_playlist(plist_url, limit)
+            movie_urls.extend(new_urls)
+            logger.info(f"The URLs of all videos in playlist {plist_url} (total: {len(new_urls)} movies): ")
+            for url in new_urls:
                 logger.info(url)
 
     if search is not None:
