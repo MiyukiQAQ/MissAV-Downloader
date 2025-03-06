@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='miyuki',
-    version='0.6.5',
+    version='0.6.6',
     packages=find_packages(),
     install_requires=[
         'curl_cffi',

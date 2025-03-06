@@ -91,10 +91,12 @@ def main():
                     'Use the -delay   option to specify the delay before retry ( seconds )\n'
                     'Use the -timeout option to specify the timeout for segment download ( seconds )\n',
         epilog='Examples:\n'
-               '  miyuki -plist "https://missav.ai/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg\n'
-               '  miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917 -proxy localhost:7890\n'
-               '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg\n'
-               '  miyuki -search sw-950 -ffcover\n',
+               '  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffcover\n'
+               '  miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917\n'
+               '  miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890\n'
+               '  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg -noban\n'
+               '  miyuki -file /home/miyuki/url.txt -ffmpeg -title\n'
+               '  miyuki -search sw-950 -ffcover -quality 720\n',
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument('-urls', nargs='+', metavar='', help='Movie URLs, separate multiple URLs with spaces')

@@ -70,15 +70,12 @@ options:
   -timeout       Timeout in seconds for segment download
 
 Examples:
-  miyuki -plist "https://missav.ai/search/JULIA?filters=uncensored-leak&sort=saved" -limit 50 -ffmpeg
-  miyuki -plist "https://missav.ai/search/JULIA?filters=individual&sort=views" -limit 20 -ffmpeg
-  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffmpeg -cover
-  miyuki -plist "https://missav.ai/playlists/ewzoukev" -ffmpeg -proxy localhost:7890
+  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffcover
   miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917
   miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890
-  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg
-  miyuki -file /home/miyuki/url.txt -ffmpeg
-  miyuki -search sw-950 -ffcover
+  miyuki -auth miyuki@gmail.com miyukiQAQ -ffmpeg -noban
+  miyuki -file /home/miyuki/url.txt -ffmpeg -title
+  miyuki -search sw-950 -ffcover -quality 720
 ```
 
 ## 💬 The ```-plist``` option
