@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='miyuki',
     version='0.6.7',
-    packages=find_packages(),
+    packages=find_packages(include=['miyuki_src', 'miyuki_src.*']),
     install_requires=[
         'curl_cffi',
     ],
