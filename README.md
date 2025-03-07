@@ -26,11 +26,12 @@ pip install --upgrade miyuki
 
 ```
 [root@miyuki ~]# miyuki -h
-usage: miyuki.py [-h] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title] [-quality] [-retry] [-delay] [-timeout]
+usage: main.py [-h] [-auto  [...]] [-urls  [...]] [-auth  [...]] [-plist] [-limit] [-search] [-file] [-proxy] [-ffmpeg] [-cover] [-ffcover] [-noban] [-title] [-quality] [-retry] [-delay] [-timeout]
 
 A tool for downloading videos from the "MissAV" website.
 
 Main Options:
+Use the -auto   option to specify the video or playlist URLs to download. can be mixed.
 Use the -urls   option to specify the video URLs to download.
 Use the -auth   option to specify the username and password to download the videos collected by the account.
 Use the -plist  option to specify the public playlist URL to download all videos in the list.
@@ -38,7 +39,7 @@ Use the -search option to search for movie by serial number and download it.
 Use the -file   option to download all URLs in the file. ( Each line is a URL )
 
 Additional Options:
-Use the -limit   option to limit the number of downloads. (Only works with the -plist option.)
+Use the -limit   option to limit the number of downloads. (Works with -plist and -auto option.)
 Use the -proxy   option to configure http proxy server ip and port.
 Use the -ffmpeg  option to get the best video quality. ( Recommend! )
 Use the -cover   option to save the cover when downloading the video
@@ -52,9 +53,10 @@ Use the -timeout option to specify the timeout for segment download ( seconds )
 
 options:
   -h, --help     show this help message and exit
+  -auto  [ ...]  Multiple movie and playlist URLs can be mixed. separate with spaces
   -urls  [ ...]  Movie URLs, separate multiple URLs with spaces
   -auth  [ ...]  Username and password, separate with space
-  -plist         Public playlist url
+  -plist         Public playlist URL, single.
   -limit         Limit the number of downloads
   -search        Movie serial number
   -file          File path
@@ -70,6 +72,7 @@ options:
   -timeout       Timeout in seconds for segment download
 
 Examples:
+  miyuki -auto "https://missav.ai/sw-950" "https://missav.ai/dm132/actresses/JULIA"
   miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffcover
   miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917
   miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890

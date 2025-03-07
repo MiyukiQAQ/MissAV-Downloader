@@ -1,12 +1,12 @@
 import argparse
 import os
 import subprocess
-from miyuki.logger import logger
-from miyuki.config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE, MAGIC_NUMBER
-from miyuki.http_client import HttpClient
-from miyuki.url_sources import SingleUrlSource, PlaylistSource, AuthSource, SearchSource, FileSource
-from miyuki.video_downloader import VideoDownloader
-from miyuki.utils import delete_all_subfolders
+from logger import logger
+from config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE, MAGIC_NUMBER
+from http_client import HttpClient
+from url_sources import SingleUrlSource, PlaylistSource, AuthSource, SearchSource, FileSource, AutoUrlSource
+from video_downloader import VideoDownloader
+from utils import delete_all_subfolders, ThreadSafeCounter
 
 banner = """
  ██████   ██████  ███                        █████       ███ 
@@ -21,6 +21,7 @@ banner = """
                        ░░██████                              
                         ░░░░░░                               
 """
+
 
 class DownloadTracker:
     def __init__(self, record_file: str):
@@ -38,6 +39,7 @@ class DownloadTracker:
         with open(self.record_file, 'a', encoding='utf-8') as f:
             f.write(url + '\n')
 
+
 def check_ffmpeg_command(ffmpeg: bool) -> bool:
     if not ffmpeg:
         return True
@@ -47,10 +49,11 @@ def check_ffmpeg_command(ffmpeg: bool) -> bool:
     except Exception:
         return False
 
+
 def validate_args(args):
-    params = [args.urls, args.auth, args.plist, args.search, args.file]
+    params = [args.urls, args.auth, args.plist, args.search, args.file, args.auto]
     if sum(param is not None for param in params) != 1:
-        logger.error("Exactly one of -urls, -auth, -plist, -search, -file must be specified.")
+        logger.error("Exactly one of -auto, -urls, -auth, -plist, -search, -file must be specified.")
         exit(MAGIC_NUMBER)
     if args.auth and len(args.auth) != 2:
         logger.error("Auth requires username and password.")
@@ -67,11 +70,13 @@ def validate_args(args):
         logger.error("The -file option must be a valid non-empty file.")
         exit(MAGIC_NUMBER)
 
+
 def main():
     parser = argparse.ArgumentParser(
         description='A tool for downloading videos from the "MissAV" website.\n'
                     '\n'
                     'Main Options:\n'
+                    'Use the -auto   option to specify the video or playlist URLs to download. can be mixed.\n'
                     'Use the -urls   option to specify the video URLs to download.\n'
                     'Use the -auth   option to specify the username and password to download the videos collected by the account.\n'
                     'Use the -plist  option to specify the public playlist URL to download all videos in the list.\n'
@@ -79,7 +84,7 @@ def main():
                     'Use the -file   option to download all URLs in the file. ( Each line is a URL )\n'
                     '\n'
                     'Additional Options:\n'
-                    'Use the -limit   option to limit the number of downloads. (Only works with the -plist option.)\n'
+                    'Use the -limit   option to limit the number of downloads. (Works with -plist and -auto option.)\n'
                     'Use the -proxy   option to configure http proxy server ip and port.\n'
                     'Use the -ffmpeg  option to get the best video quality. ( Recommend! )\n'
                     'Use the -cover   option to save the cover when downloading the video\n'
@@ -91,6 +96,7 @@ def main():
                     'Use the -delay   option to specify the delay before retry ( seconds )\n'
                     'Use the -timeout option to specify the timeout for segment download ( seconds )\n',
         epilog='Examples:\n'
+               '  miyuki -auto "https://missav.ai/sw-950" "https://missav.ai/dm132/actresses/JULIA"\n'
                '  miyuki -plist "https://missav.ai/dm132/actresses/JULIA" -limit 20 -ffcover\n'
                '  miyuki -urls https://missav.ai/sw-950 https://missav.ai/dandy-917\n'
                '  miyuki -urls https://missav.ai/sw-950 -proxy localhost:7890\n'
@@ -99,9 +105,10 @@ def main():
                '  miyuki -search sw-950 -ffcover -quality 720\n',
         formatter_class=argparse.RawTextHelpFormatter
     )
+    parser.add_argument('-auto', nargs='+', metavar='', help='Multiple movie and playlist URLs can be mixed. separate with spaces')
     parser.add_argument('-urls', nargs='+', metavar='', help='Movie URLs, separate multiple URLs with spaces')
     parser.add_argument('-auth', nargs='+', metavar='', help='Username and password, separate with space')
-    parser.add_argument('-plist', type=str, metavar='', help='Public playlist url')
+    parser.add_argument('-plist', type=str, metavar='', help='Public playlist URL, single.')
     parser.add_argument('-limit', type=str, metavar='', help='Limit the number of downloads')
     parser.add_argument('-search', type=str, metavar='', help='Movie serial number')
     parser.add_argument('-file', type=str, metavar='', help='File path')
@@ -133,11 +140,15 @@ def main():
         os.environ["https_proxy"] = f"http://{args.proxy}"
 
     http_client = HttpClient()
-    source = (SingleUrlSource(args.urls) if args.urls else
-              AuthSource(args.auth[0], args.auth[1]) if args.auth else
-              PlaylistSource(args.plist, args.limit) if args.plist else
-              SearchSource(args.search) if args.search else
-              FileSource(args.file) if args.file else None)
+    movie_counter = ThreadSafeCounter()
+    source = (
+        AutoUrlSource(movie_counter, args.auto, args.limit) if args.auto else
+        SingleUrlSource(movie_counter, args.urls) if args.urls else
+        AuthSource(movie_counter, args.auth[0], args.auth[1]) if args.auth else
+        PlaylistSource(movie_counter, args.plist, args.limit) if args.plist else
+        SearchSource(movie_counter, args.search) if args.search else
+        FileSource(movie_counter, args.file) if args.file else None
+    )
     if not source:
         logger.error("No source specified.")
         exit(MAGIC_NUMBER)
@@ -177,6 +188,7 @@ def main():
         except Exception as e:
             logger.error(f"Failed to download {url}: {e}")
         delete_all_subfolders(MOVIE_SAVE_PATH_ROOT)
+
 
 if __name__ == "__main__":
     main()

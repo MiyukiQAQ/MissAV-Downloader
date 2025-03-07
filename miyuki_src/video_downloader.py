@@ -2,11 +2,12 @@ import os
 import re
 from typing import Optional, Tuple
 import threading
-from miyuki.config import MOVIE_SAVE_PATH_ROOT, MATCH_UUID_PATTERN, MATCH_TITLE_PATTERN, COVER_URL_PREFIX, TMP_HTML_FILE, RESOLUTION_PATTERN, VIDEO_M3U8_PREFIX, VIDEO_PLAYLIST_SUFFIX
-from miyuki.http_client import HttpClient
-from miyuki.logger import logger
-from miyuki.utils import ThreadSafeCounter, display_progress_bar, split_integer_into_intervals, find_last_non_empty_line, find_closest
-from miyuki.ffmpeg_processor import FFmpegProcessor
+from config import MOVIE_SAVE_PATH_ROOT, MATCH_UUID_PATTERN, MATCH_TITLE_PATTERN, COVER_URL_PREFIX, TMP_HTML_FILE, RESOLUTION_PATTERN, VIDEO_M3U8_PREFIX, VIDEO_PLAYLIST_SUFFIX
+from http_client import HttpClient
+from logger import logger
+from utils import ThreadSafeCounter, display_progress_bar, split_integer_into_intervals, find_last_non_empty_line, find_closest
+from ffmpeg_processor import FFmpegProcessor
+
 
 class VideoDownloader:
     def __init__(self, url: str, http_client: HttpClient, options: dict):
@@ -42,6 +43,8 @@ class VideoDownloader:
             safe_title = origin_title
             for char in illegal_chars:
                 safe_title = safe_title.replace(char, '_')
+            if "uncensored" in self.url:
+                safe_title += "_uncensored"
             self.title = safe_title
         return True
 

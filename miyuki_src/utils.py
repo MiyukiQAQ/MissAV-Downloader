@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Tuple
 
+
 class ThreadSafeCounter:
     def __init__(self) -> None:
         self._count = 0
@@ -18,6 +19,7 @@ class ThreadSafeCounter:
         with self._lock:
             self._count = 0
 
+
 def display_progress_bar(max_value: int, file_counter: ThreadSafeCounter) -> None:
     bar_length = 50
     current_value = file_counter.increment_and_get()
@@ -27,6 +29,7 @@ def display_progress_bar(max_value: int, file_counter: ThreadSafeCounter) -> Non
     sys.stdout.write(text)
     sys.stdout.flush()
 
+
 def split_integer_into_intervals(integer: int, n: int) -> list[Tuple[int, int]]:
     interval_size = integer // n
     remainder = integer % n
@@ -35,12 +38,14 @@ def split_integer_into_intervals(integer: int, n: int) -> list[Tuple[int, int]]:
         intervals[-1] = (intervals[-1][0], intervals[-1][1] + remainder)
     return intervals
 
+
 def find_last_non_empty_line(text: str) -> str:
     lines = text.splitlines()
     for line in reversed(lines):
         if line.strip():
             return line
     raise Exception("Failed to find the last non-empty line in m3u8 playlist.")
+
 
 def find_closest(arr: list[int], target: int) -> int:
     closest = arr[0]
@@ -51,6 +56,7 @@ def find_closest(arr: list[int], target: int) -> int:
             min_diff = diff
             closest = num
     return closest
+
 
 def delete_all_subfolders(folder_path: str) -> None:
     if not os.path.exists(folder_path):
