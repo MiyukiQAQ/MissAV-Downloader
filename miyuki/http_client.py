@@ -1,8 +1,8 @@
 from typing import Optional
 import time
 from curl_cffi import requests
-from config import HEADERS, RETRY, DELAY, TIMEOUT
-from logger import logger
+from miyuki.config import HEADERS, RETRY, DELAY, TIMEOUT
+from miyuki.logger import logger
 
 
 class HttpClient:

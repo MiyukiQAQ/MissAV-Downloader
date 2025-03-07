@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 import re
 from typing import Optional
-from http_client import HttpClient
-from config import HREF_REGEX_PUBLIC_PLAYLIST, HREF_REGEX_NEXT_PAGE, MATCH_UUID_PATTERN
-from logger import logger
-from utils import ThreadSafeCounter
+from miyuki.http_client import HttpClient
+from miyuki.config import HREF_REGEX_PUBLIC_PLAYLIST, HREF_REGEX_NEXT_PAGE, MATCH_UUID_PATTERN
+from miyuki.logger import logger
+from miyuki.utils import ThreadSafeCounter
 from enum import Enum
 
 class UrlType(Enum):

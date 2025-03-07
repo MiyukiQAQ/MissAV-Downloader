@@ -1,12 +1,12 @@
 import argparse
 import os
 import subprocess
-from logger import logger
-from config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE, MAGIC_NUMBER
-from http_client import HttpClient
-from url_sources import SingleUrlSource, PlaylistSource, AuthSource, SearchSource, FileSource, AutoUrlSource
-from video_downloader import VideoDownloader
-from utils import delete_all_subfolders, ThreadSafeCounter
+from miyuki.logger import logger
+from miyuki.config import MOVIE_SAVE_PATH_ROOT, RECORD_FILE, MAGIC_NUMBER
+from miyuki.http_client import HttpClient
+from miyuki.url_sources import SingleUrlSource, PlaylistSource, AuthSource, SearchSource, FileSource, AutoUrlSource
+from miyuki.video_downloader import VideoDownloader
+from miyuki.utils import delete_all_subfolders, ThreadSafeCounter
 
 banner = """
  ██████   ██████  ███                        █████       ███ 

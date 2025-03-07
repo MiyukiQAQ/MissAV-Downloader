@@ -1,7 +1,7 @@
 import subprocess
 from typing import Optional
-from config import FFMPEG_INPUT_FILE
-from logger import logger
+from miyuki.config import FFMPEG_INPUT_FILE
+from miyuki.logger import logger
 
 
 class FFmpegProcessor:

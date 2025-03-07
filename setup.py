@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name='miyuki',
-    version='0.6.8',
-    packages=find_packages(include=['miyuki_src', 'miyuki_src.*']),
+    version='0.7.0',
+    packages=find_packages(),
     install_requires=[
         'curl_cffi',
     ],
     entry_points={
         'console_scripts': [
-            'miyuki=miyuki_src.main:main',
+            'miyuki=miyuki.main:main',
         ],
     },
     author='MiyukiQAQ',
